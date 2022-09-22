@@ -1,0 +1,43 @@
+---
+title: "Quiz1"
+author: "Billy"
+date: "2022-08-13"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+install.packages("gapminder")
+install.packages("tidyverse")
+library(gapminder)
+library(tidyverse)
+
+population=gapminder$pop
+
+sum(population > 1000000)
+
+
+```
+```{r}
+x = 1:9
+y = c(785, 468, 377, 247, 229, 177, 156, 128, 133)
+n=sum(y)
+k=length(y)
+
+p=log(1+(1/x), base=10)
+p
+
+ey=p*y
+ey
+t0=sum((y-ey)^2/ey) #test statistic
+t0
+
+pval = (1-pchisq(t0, df = k -1))
+pval
+
+```
+
+

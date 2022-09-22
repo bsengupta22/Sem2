@@ -1,0 +1,373 @@
+---
+title: "A1 Report"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+author: "510436016"
+output: 
+  html_document: 
+    self_contained: true # Creates a single HTML file as output
+    code_folding: hide # Code folding; allows you to show/hide code chunks
+    code_download: true # Includes a menu to download the code file
+    toc: true # (Optional) Creates a table of contents!
+    toc_float: true # table of contents at the side
+---
+
+# 1 Introduction
+
+The data set being studied was a sample from the cohort of Data2x02 consisting of normal students Data2002 and advanced students Data2902. Using R markdown (Xie, Allaire and Grolemund, 2018) for reproducibility and R (R Core Team 2022) to test and visualize data. The testing and visualization process was aided by several packages - tidyverse (Wickham et al. 2019), ggplot (Wickham et al. 2019) and naniar (Tierney, 2021).
+
+## 1.1 Data Wrangling
+
+There were a variety of decisions that needed to be made when cleaning and selecting data for my tests. 
+
+Generally, I looked over the data from each variable using the unique(variable) function in order to grasp whether it would be easy to clean and sort the data. This also allowed me to identify outliers in the data easily. Moreover, I used the table displaying missing data to choose variables which had a higher sample size and thus more reliable data. Additionally, I used the old_names and new_names variables that the course provided. This helped me in my data cleaning significantly as it removed some of the manual changes i would have had to do.
+
+```{r, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(dplyr)
+library(gt)
+library(data.table)
+x = readr::read_tsv("DATA2x02 survey (2022) - Form responses 1.tsv")
+old_names = colnames(x)
+new_names = c("timestamp","covid_positive","living_arrangements","height","uni_travel_method","uni_travel_listen","spain_budget","feel_overseas","feel_anxious","study_hrs","read_news","study_load","work","lab_zoom","social_media","gender","sleep_time","wake_time","random_number","steak_preference","dominant_hand","normal_advanced","exercise_hrs","employment_hrs","city","weekly_saving","hourly_plan","weeks_behind","assignment_on_time","used_r_before","team_role","data2x02_hrs","social_media_hrs","uni_year","sport","wam","shoe_size","decade_selection")
+
+# overwrite the old names with the new names:
+colnames(x) = new_names
+
+# combine old and new into a data frame:
+name_combo = bind_cols(New = new_names, Old = old_names)
+
+```
+
+For question **2.2.1** I manually looked over the NA data to make sure it was appropriate to na.omit() the variable before doing so. After this i used the select and filter functions to select and then sum (using nrow) the variables of interest. I also set a seed for this question as i used a Monte Carlo p value.
+
+For question **2.2.2**, when using the unique function I saw there were a few data entry's which seemed improbable, this caused me to omit values that were greater than 25 hours of study per week. After this, i transformed the data into a box plot in order to visualize the distribution of the data.
+
+For question **2.2.3** I used the select and filter functions again to select and filter my data into custom variables. This allowed me to access summations of data without hardcoding before entering the variables into a matrix. After this I organised it into a table in order to summarise the data in a different form. 
+
+## 1.2 Motivation for Questions
+
+The questions I asked in my hypothesis' were motivated by experiences in my life.
+
+The first question regarding work and study patterns of Data2x02 students was out of personal interest. I find balancing uni and a job very difficult and so I was intrigued as to how job patterns change with different involvements in Uni.
+
+The second question extends upon my intrigue about the challenges that university provides. Every year of my schooling I have been recommended study hours, whilst no doubt useful, they have been rarely implemented and so now with a set of data and a recommended study time I was able to conduct a test. I chose to lower the expected hours of study to 8 hours a week as i believed that was closer to the average university student, although in recent weeks an average of 10 hours per week may be more accurate.
+
+My last question was once again borne of personal interest. I love sport and was interested in if students choose to participate or not to participate in sport later in their degrees.
+
+
+
+# 2 Required Questions 
+
+## 2.1 - General Dicussion of the Data
+
+### 2.1.1 Is this a random sample of DATA2X02 students?
+
+A random sample is a subset of a  population in which each member of the subset has an equal probability of being chosen. In this case, each member of data2x02 had an equal probability of seeing the survey as it was posted on the main ed forum and mentioned in lectures. Whilst there are biases which may affect the data, each member of the cohort had equal probsbility to view the survey, and equal opportunity to fill in the survey. Therefore it is a random sample.
+
+
+### 2.1.2  What are the potential biases? 
+
+**Selection bias** occurs when people volunteer for a study and occurs because those who volunteered may share characteristics that differentiates them from those who did not volunteer, meaning the data collected may not truly reflect the population being sampled from. For instance, the higher proportion of data from Data2902 students may increase the average WAM above what it would be with data entry from all students.
+
+```{r, warning=FALSE, message=FALSE}
+data2902students = x %>% select(wam, normal_advanced) %>% 
+  filter(normal_advanced == "DATA2902")
+data2902students <- data2902students %>% na.omit()
+
+data2002students = x %>% select(wam, normal_advanced) %>% 
+  filter(normal_advanced == "DATA2002")
+data2002students <- data2002students %>% na.omit()
+
+
+norm_adv_basictable <- table(x$normal_advanced) %>% 
+                          as.data.frame() %>% 
+                              setNames(c("a", "b"))
+
+
+norm_adv_basictable$c = c(780,80)
+norm_adv_basictable <- transform(norm_adv_basictable, r=(b/c *100))
+norm_adv_basictable <- transform(norm_adv_basictable, w=c(mean(data2002students$wam), mean(data2902students$wam)))
+  
+norm_adv_basictable %>% gt() %>% 
+  tab_header(title = "Survey Responses", subtitle = "Data2002 vs Data2902") %>% 
+    cols_label(
+    a = "Course",
+    b = "Responses",
+    c = "Students",
+    r = "Response Rate (%)",
+    w = "WAM"
+  )
+```
+
+
+The WAM variable however, is also likely to be subject to **sensitivity bias**. This occurs when participants enter socially desirable outcomes rather than truthful ones when answering potentially sensitive questions. Additionally, variables subject to sensitivity bias can experience higher levels of missing data, this reduces the reliability of the data collected by decreasing its sample size and its representativeness of the population. For instance, in the Data2x02 sample there were the most NA values in the WAM and weekly savings category.
+
+```{r, warning = FALSE, message=FALSE}
+library(naniar)
+gg_miss_var(x) + labs(title = "Missingness of Data")
+
+```
+
+  
+### 2.1.3 Which questions needed improvement to generate useful data 
+
+
+Specifying a **unit of measurement** for data entry would have been useful in several questions. For instance, specifying height in cm or shoe size in US (men/women) would have standardized responses. This would have eased the data cleaning process and improved the reliability of the data by increasing the sample size due to less NA values. 
+
+Moreover, implementing **response validation** would have increased the reliability of data. For instance, data entry of height 254, wam 100 and 10000 hours studying per week are improbable/impossible. Setting maximum/minimum limits on data entry could have fixed some of these issues. 
+
+Additionally, improving **specificity in questions** would have improved data collection. For example, when answering *"On average, how many hours each week do you spend exercising?"*, individuals have to define exercising for themselves. For some this may mean walking to university or to a coffee shop, whilst for others, this may mean going to the gym or going for a run. The scope of interpretation for this question would change the data entered for the question significantly, decreasing its usefulness and reliability.
+
+
+
+
+
+## 2.2 - Specific Hypothesis Tests
+
+
+### 2.2.1 Chi Squared Test Using Monte Carlo P Value
+
+
+An employer is interested in studying whether there is a difference in the work patterns of full time and part time students who study Data2x02. The employer performs a test for independence on the data at a 5% level of significance.
+
+
+- **Hypothesis** 
+  + $H_{0}:$ There is a relationship between a students study load and their work load
+  + $H_{1}:$ There isn't a relationship between a students study load and their work load
+  + note that the alternative hypothesis $H_{1}: \mu < 8$ signals that we are looking in the lower tail
+- **Assumptions**
+  + We assume that each variable is chosen at random from a population of size *n*
+- **Test Statistic** 
+  + $T =\Sigma_{i=1}^{r}\Sigma_{j=1}^{c} \frac{(Y_{ij} - e_{ij})^2}{e_{ij}}$
+- **P value** 
+  + $P(\chi^2_{3} \ge t_{0})$
+- **Decision**
+  + Reject $H_{0}$ if $p-value \ge \alpha$
+
+
+
+
+```{r, message = FALSE, warning = FALSE, include = TRUE, guide }
+
+test2 <- data.frame(x$work, x$study_load)
+test2 <- as.data.frame(test2)
+test2 <- test2 %>% na.omit()
+colnames(test2) = c("Work_load", "Study_load")
+
+
+cas_full = test2 %>% select(Work_load, Study_load) %>% 
+  filter(Work_load %in% c("Casual") & Study_load == "Full time")
+
+cas_part = test2 %>% select(Work_load, Study_load) %>% 
+  filter(Work_load == "Casual" & Study_load == "Part time")
+
+full_full = test2 %>% select(Work_load, Study_load) %>% 
+  filter(Work_load == "Full time" & Study_load == "Full time")
+
+full_part = test2 %>% select(Work_load, Study_load) %>% 
+  filter(Work_load == "Full time" & Study_load == "Part time")
+
+part_full = test2 %>% select(Work_load, Study_load) %>% 
+  filter(Work_load == "Part time" & Study_load == "Full time")
+
+part_part = test2 %>% select(Work_load, Study_load) %>% 
+  filter(Work_load == "Part time" & Study_load == "Part time")
+
+dw_full = test2 %>% select(Work_load, Study_load) %>% 
+  filter(Work_load == "I don't currently work" & Study_load == "Full time")
+
+dw_part = test2 %>% select(Work_load, Study_load) %>% 
+  filter(Work_load == "I don't currently work" & Study_load == "Part time")
+
+
+
+matrix_for_test = matrix(c(nrow(cas_full), nrow(cas_part), nrow(dw_full), nrow(dw_part), 
+                           nrow(full_full), nrow(full_part), nrow(part_full), nrow(part_part)), ncol = 4)
+colnames(matrix_for_test) = c("Casual", "Dont", "Full time", "Part time")
+rownames(matrix_for_test) = c("Full time Study", "Part time Study")
+
+
+graph = matrix_for_test %>% as.data.frame() %>% 
+  tibble::rownames_to_column(var = "StudyLoad") %>% 
+  tidyr::pivot_longer(c("Casual", "Dont", "Full time", "Part time"), 
+                      names_to = "WorkLoad", values_to = "count")
+
+
+p_base = ggplot(graph, aes(x = WorkLoad, y = count, fill = StudyLoad)) + 
+  theme_bw(base_size = 12) + 
+  scale_fill_brewer(palette = "Set1") + 
+  labs(fill = "", x = "Work Group") +
+  theme(legend.position = "top")
+
+p1 = p_base + 
+  geom_bar(stat = "identity") + 
+  labs(y = "Count") 
+p2 = p_base + 
+  geom_bar(stat = "identity", position = "fill") + 
+  labs(y = "Proportion")
+gridExtra::grid.arrange(p1, p2, ncol = 2)
+
+
+```
+
+```{r}
+set.seed(112)
+myTest1 <- chisq.test(matrix_for_test, simulate.p.value = TRUE, B = 10000)
+
+```
+
+#### Decision:
+
+Since the p-value much greater than 0.05 (0.3042), **we do not reject**. There is insufficient evidence to conclude that the distribution of work load is different for different study loads. 
+
+### 2.2.2 Mean test
+
+Professor Tarr recommends to study Data2x02 on an average of 10 hours per week to stay up to date, however, he understands that students often do not follow recommendations and so he supposes that the mean study time of students in Data2x02 would be 8 hours per week. He then consults a tutor who believes that a mean of 8 hours per week is too large and so he conducts the following mean test to see if students study less than 8 hours per week at the 95% significance level.
+
+#### Means Test Workflow and Test
+
+
+- **Hypothesis** 
+  + $H_{0}: \mu = 8$ 
+  + $H_{1}: \mu < 8$
+  + note that the alternative hypothesis $H_{1}: \mu < 8$ signals that we are looking in the lower tail
+- **Assumptions**
+  + We assume that each variable is chosen at random from a population of size *n*
+- **Test Statistic**
+  + $t = \frac{\bar{x} -\mu_{0}}{s/ \sqrt{n}}$
+- **P value**
+  + $P(t_{n-1 \ge t_{0}})$
+
+
+
+##### Boxplot Representation of Data2x02 Study
+
+
+```{r, warning = FALSE, message = FALSE, include = TRUE}
+
+set.seed(123)
+
+# removes hours per week that are greater than 25 and na values
+data_to_test1 = x$data2x02_hrs[! x$data2x02_hrs > 25] %>% na.omit()
+data_to_test1 <- data.frame(data_to_test1)
+
+
+
+bp1 = ggplot(data_to_test1, aes(x = "", y = data_to_test1)) +
+  geom_boxplot(alpha = 0.5, coef = 10) +
+  geom_hline(yintercept = 8, linetype = "dashed", colour ="red") +
+  labs(x = "", y = "Data2x02 Hours Studied (per week)") +
+  theme_bw(base_size = 15) +
+  theme(axis.ticks.x = element_blank(),
+        axis.text.x = element_blank())
+bp1
+
+```
+
+```{r}
+myTest2 <- t.test(data_to_test1, mu = 8, alternative = "less")
+```
+#### Decision
+
+The t.test function provides a p value of $P(t_{194} \le -3.8335) = 0.00008553$, meaning we reject **the null hypothesis**. In the context of the question, this means that students study less than 8 hours per week on average. This test could be improved by increasing the sample size of data. Morevoer, specifying 'study' in the question would improve the results, for some study may include lectures and tutorials whilst for others it may mean additional work on top of course material.
+
+
+
+### 2.2.3 Test for Homogoneity
+
+**Question**: Is there any evidence that the later you are into your uni degree the less likely you are to participate in sport?
+
+
+
+#### Workflow
+
+- **Hypothesis**
+  + $H_{0}$: $p_{11} = p_{21}$ & $p_{12} = p_{22}$ 
+  + $H_{1}$: The proportions are different across the two different populations
+  + NOTE: Under $H_{0}$, the expected counts are $e_{ij} = n_{i}{\hat{y}_{ij} = y_{i \cdot}\frac {y_{\cdot j}}{n}}$
+- **Assumptions**
+  + Independent observations
+  + $e_{ij} = \frac{y_{i\cdot}y_{\cdot j}}{n} \ge 5$
+    + $e_{11} = 33.26$
+    + $e_{12} = 13.74$
+    + $e_{21} = 104.7$
+    + $e_{22} = 43.26$
+    
+- **Test Statistic** 
+  + $T =\Sigma_{i=1}^{r}\Sigma_{j=1}^{c} \frac{(Y_{ij} - e_{ij})^2}{e_{ij}}$
+- **P value** 
+  + $P(\chi^2_{1} \ge t_{0})$
+- **Decision**
+  + Reject $H_{0}$ if $p-value \ge \alpha$
+
+```{r, message = FALSE, warning = FALSE}
+
+test4 <- data.table(x$uni_year, x$sport)
+test4 <- as.data.frame(test4)
+test4 <- test4 %>% na.omit()
+colnames(test4) = c("uni_year", "sport")
+
+
+early_uni_no_sport = test4 %>% select(uni_year, sport) %>% 
+  filter(sport %in% c("I don't play any sport") & uni_year %in% c("First year", "Second year"))
+
+late_uni_no_sport = test4 %>% select(uni_year, sport) %>% 
+  filter(sport %in% c("I don't play any sport") & uni_year %in% c("Third year", "Fourth year", "Fifth or higher year "))
+
+early_uni_yes_sport = test4 %>% select(uni_year, sport) %>% 
+  filter(sport != c("I don't play any sport") & uni_year %in% c("First year", "Second year"))
+
+late_uni_yes_sport = test4 %>% select(uni_year, sport) %>% 
+  filter(sport != c("I don't play any sport") & uni_year %in% c("Third year", "Fourth year", "Fifth or higher year "))
+
+matrix4 = matrix(c(nrow(early_uni_no_sport), nrow(early_uni_yes_sport), nrow(late_uni_no_sport), nrow(late_uni_yes_sport)), ncol = 2)
+
+colnames(matrix4) = c("Early", "Late")
+rownames(matrix4) = c("No", "Yes")
+table4 <- as.table(matrix4)
+
+```
+
+##### Visual Summary of the data
+
+```{r, warning = FALSE, message = FALSE}
+
+table4copy = as.data.frame(table4)
+
+table4copy %>% gt() %>% 
+  tab_header(title = "Participation in Sport", subtitle = "Early uni (1st and 2nd year) vs Late uni (3rd year and above")  %>% 
+  cols_label("Var1" = "Play sport", "Var2" = "Stage of Uni", "Freq" = "Count")
+
+
+```
+
+
+##### The Decision:
+
+```{r, warning = FALSE, message = FALSE}
+test4 <- chisq.test(matrix4, correct = FALSE)
+```
+Since the p value is above 0.05, (p = 0.1688), meaning the chance of getting a result as or more extreme than this is 16%, we **do not reject** the null hypothesis. In the context of the question, the results are consistent with the idea that sports participation remains the same across your university degree. This result could be improved by increasing the sample size and the specificity of the question, for instance *Do you participate in sport (5 hours + a week)?*
+
+
+# 3 Conclusion
+
+We can conclude that the work patterns of data2x02 students is similar across different study loads. Additionally, the average data2x02 students study less than 8 hours per week, and finally that data2x02 students participate in sport equally across the life of their degree. 
+
+The validity of these results could be improved by increasing the size of the sample, perhaps to the population of Data2x02 students. Moreover, increasing the specificity of the questions in the survey would allow the hypothesized questions to be more specific. 
+
+# 4 References
+
+Kassambara, Alboukadel. 2020. Ggpubr: Ggplot2 Based Publication Ready Plots. https://rpkgs.datanovia.com/ggpubr/.
+
+
+Tierney 2021. Getting Started with naniar. https://cran.r-project.org/web/packages/naniar/vignettes/getting-started-w-naniar.html
+
+
+R Core Team. 2022. R: A Language and Environment for Statistical Computing. Vienna, Austria: R Foundation for Statistical Computing. https://www.R-project.org/.
+
+Wickham, Hadley, Mara Averick, Jennifer Bryan, Winston Chang, Lucy D’Agostino McGowan, Romain François, Garrett Grolemund, et al. 2019. “Welcome to the tidyverse.” Journal of Open Source Software 4 (43): 1686. https://doi.org/10.21105/joss.01686.
+
+Xie, Yihui, J. J. Allaire, and Garrett Grolemund. 2018. R Markdown: The Definitive Guide. Boca Raton, Florida: Chapman; Hall/CRC. https://bookdown.org/yihui/rmarkdown.
+  
+

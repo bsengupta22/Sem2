@@ -1,0 +1,176 @@
+---
+title: "RMarkdownLecture1"
+author: "Billy"
+date: "2022-08-03"
+output: html_document
+---
+
+```{r, message=FALSE}
+
+library(tidyverse)
+library(palmerpenguins)
+```
+
+Lets look at some data"
+
+```{r}
+
+dplyr:glimpse(penguins_raw)
+
+```
+
+Clean and drop NA values
+
+```{r}
+
+penguins_clean = penguins_raw |>
+  janitor::clean_names() |>
+  tidyr::drop_na(sex)
+
+```
+
+## Penguins
+
+```{r}
+
+library(palmerpenguins)
+glimpse(penguins)
+cor(penguins$bill_length_mm, penguins$bill_depth_mm,
+    use = "pairwise.complete.obs")
+
+#The Dyplr method
+
+penguins %>%
+  summarise(
+    
+    Correlation = cor(bill_length_mm, bill_depth_mm, 
+                      use = "pairwise.complete.obs")
+  )
+
+
+```
+
+But if we break it down by species:
+
+```{r}
+penguins %>%
+  group_by(species)%>%
+  summarise(
+    
+    Correlation = cor(bill_length_mm, bill_depth_mm, 
+                      use = "pairwise.complete.obs")
+  )
+
+```
+
+
+
+## Plotting our penguins data
+
+```{r}
+
+penguins %>%
+  ggplot() +
+  aes(x = bill_length_mm, y = bill_depth_mm, colour = species) +
+  geom_point() +
+  geom_smooth(method = "lm")
+```
+
+
+#Lecture 3- No linkage 
+
+```{r}
+library(tidyverse)
+df = tibble(
+  phenotype = c("AB", "Ab", "aB", "ab"),
+  # observed types
+  y = c(128, 86, 74, 112),
+  #hypothesized proportions
+  p = c(1/4, 1/4, 1/4, 1/4),
+  #expected counts
+  e = sum(y)*p
+)
+df
+
+```
+
+#Is no linkage a good model?
+
+```{r}
+
+df |> ggplot() +
+  aes(x=phenotype, y=y) + 
+  geom_col(alpha=0.6) +
+  geom_hline(yintercept=100, 
+             colour="blue",
+             size=2) +
+  labs(x="", y="Count")
+
+```
+
+#Differnce between expected count and actual count
+```{r}
+
+df = df |>
+  mutate(d = y  - e)
+df
+
+#Adds new column d to df which is the difference between y and e (actual ad expected)
+```
+
+```{r}
+
+df |> 
+  summarise(avg_diff = mean(d))
+
+```
+
+```{r}
+
+df = df |> mutate(
+  squared_discrepency = (y-e)^2,
+  contribution = (y-e)^2/e
+)
+t0 = sum(df$contribution)
+t0
+
+```
+
+#Simulation
+
+```{r}
+n = 400
+set.seed(1)
+sim1 = sample(x = names, 
+              size = n, 
+              replace = TRUE, 
+              prob = c(0.25,0.25,0.25,0.25))
+table(sim1)
+par(cex=2)
+barplot(table(sim1), main = "Simulated counts")
+```
+
+```{r}
+
+#This simulates null hypothesis being true and gives us 4.06 as test statistic
+sim_y = table(sim1)
+sum((sim_y - df$e)^2/df$e)
+t0
+
+```
+```{r}
+B = 3000
+sim_test_stats = vector(mode = "numeric", length = B)
+for(i in 1:B){
+  sim = sample(x = df$phenotype,  size = 400, replace = TRUE, 
+               prob = c(0.25,0.25,0.25,0.25))
+  sim_y = table(sim)
+  sim_test_stats[i] = sum((sim_y - e)^2/e)
+}
+par(cex = 2, mar = c(4,4,0.5,0.5))
+hist(sim_test_stats, main = "", breaks = 20)
+mean(sim_test_stats >= t0)
+
+
+```
+

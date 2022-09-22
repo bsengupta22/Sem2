@@ -1,0 +1,141 @@
+---
+title: "Thinking about our t-test assumptions"
+---
+
+```{r, message=FALSE}
+library(tidyverse)
+```
+
+
+
+Let's generate data for a two sample t-test:
+
+```{r}
+n1 = 10
+n2 = 10
+x = rnorm(n1)
+y = rnorm(n2)
+dat = tibble::tibble(
+  value = c(x,y),
+  group = rep(c("A","B"), times = c(n1,n2))
+)
+```
+
+Visualise this:
+
+```{r}
+p = dat %>% ggplot() + 
+  aes(x = group, y = value) + 
+  geom_boxplot()
+q = dat %>% ggplot() + 
+  aes(sample = value) + 
+  geom_qq_line() + geom_qq() + 
+  facet_grid(~group)
+q
+```
+
+Perform a t-test:
+
+```{r}
+t.test(value~group, data = dat, var.equal = TRUE)
+```
+
+Extract the p-value
+
+```{r}
+tt = t.test(value~group, data = dat, var.equal = TRUE)
+tt$p.value
+```
+
+OK, let's do this a lot of times:
+
+```{r}
+B = 5000
+res_p = vector("numeric", length = B)
+for(i in 1:B){
+  x = rnorm(n1)
+  y = rnorm(n2)
+  dat = tibble::tibble(
+    value = c(x,y),
+    group = rep(c("A","B"), times = c(n1,n2))
+  )
+  tt = t.test(value~group, data = dat, var.equal = TRUE)
+  res_p[i] = tt$p.value
+}
+```
+
+In this case we **know** the null hypothesis is true because we samples `x` and `y` from a standard normal distribution. 
+
+How often do we see a "significant" result using a significance level of 5%?
+
+```{r}
+mean(res_p<0.05)
+```
+
+How often do we see a "significant" result using a significance level of 10%?
+
+```{r}
+mean(res_p<0.1)
+```
+
+## Normality assumption
+
+What if we don't have normal samples?
+
+```{r}
+n1 = 10
+n2 = 10
+x = rchisq(n1, df = 1)
+y = rchisq(n2, df = 1)
+dat = tibble::tibble(
+  value = c(x,y),
+  group = rep(c("A","B"), times = c(n1,n2))
+)
+p %+% dat
+q %+% dat
+```
+
+
+```{r}
+B = 5000
+res_p = vector("numeric", length = B)
+for(i in 1:B){
+  x = rchisq(n1, df = 1)
+  y = rchisq(n2, df = 1)
+  dat = tibble::tibble(
+    value = c(x,y),
+    group = rep(c("A","B"), times = c(n1,n2))
+  )
+  tt = t.test(value~group, data = dat, var.equal = TRUE)
+  res_p[i] = tt$p.value
+}
+mean(res_p<0.1)
+```
+
+## Equal variance assumption
+
+What about the equal variance assumption?
+
+
+```{r}
+B = 5000
+n1 = 10
+n2 = 10
+res_p_welch = res_p_classic = vector("numeric", length = B)
+for(i in 1:B){
+  x = rnorm(n1, mean = 0, sd = 1)
+  y = rnorm(n2, mean = 0, sd = 2)
+  dat = tibble::tibble(
+    value = c(x,y),
+    group = rep(c("A","B"), times = c(n1,n2))
+  )
+  tt_welch = t.test(value~group, data = dat, var.equal = FALSE)
+  tt_classic = t.test(value~group, data = dat, var.equal = TRUE)
+  res_p_welch[i] = tt_welch$p.value
+  res_p_classic[i] = tt_classic$p.value
+}
+mean(res_p_welch<0.05)
+mean(res_p_classic<0.05)
+```
+
+

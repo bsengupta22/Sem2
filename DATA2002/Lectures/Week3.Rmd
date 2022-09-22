@@ -1,0 +1,83 @@
+---
+title: "Week3Lecture"
+author: "Billy"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Testing for homogeneity
+
+
+
+```{r}
+library(tidyverse)
+library(janitor)
+titanic_df = as.data.frame(Titanic)
+head(titanic_df)
+
+
+```
+
+```{r}
+y_mat = xtabs(Freq ~ Sex + Survived, data = titanic_df)
+y_mat
+
+chisq.test(y_mat)
+
+##Lowers to third class adults
+t3a=titanic_df |>
+  filter(Class == "3rd",
+         Age == "Adult")
+
+y_mat=xtabs(Freq ~ Sex + Survived, data = t3a)
+y_mat
+
+
+
+t3a |>
+  ggplot()+
+  aes(x=Sex,
+      y=Freq,
+      fill=Survived) + 
+  geom_col() + scale_fill_brewer(palette = "Set1")
+
+chisq.test(y_mat, correct = FALSE)
+
+
+```
+Small p value means that its super unlikely to observe this contingency table, we would reject null hypoythesis
+
+```{r}
+install.packages("gt")
+
+y=c(24, 32, 46, 22, 38, 38)
+n=sum(y)
+c=3
+r=2
+y_mat=matrix(y, nrow=r, ncol=c)
+
+colnames(y_mat) =c("Positive", "Negative", "NoOpinion")
+rownames(y_mat) = c("High income", "Low income")
+
+
+chisq.test(y_mat)
+
+```
+```{r}
+
+truth = c("milk", "tea", "tea", "milk", "tea", "tea",  "milk", "milk")
+predicted = c("milk", "tea", "tea", "milk", "tea", "tea",  "milk", "milk")
+y.mat=table(truth, predicted)
+
+y.mat
+
+chisq.test(y.mat, correct = FALSE)
+
+```
+
+
+ 

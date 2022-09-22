@@ -1,0 +1,275 @@
+---
+title: "Lecture3Formulas"
+author: "Billy"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Lecture 3
+
+### Present value of multiple ammounts
+
+The present value of a stream of cash flows can be determined using the following equation:
+
+* PV = present value of multiple future cash flows
+* $CF_{t}$ = cash flow received in period t
+* r = the compound interest rate
+* t = the number of periods before CF is received or paid
+
+$$ PV = \sum_{t=1}^{n} CF_{t}/(1+r)^{t} $$
+
+Example:
+
+You are offered an investment that promises \$1000 in the first year, \$2000 in the second year, \$3000 in the third year and \$500 in the fourth year. If an investment opportunity of similar risk generates a return of 10% p.a. compounded monthly, what is the maximum amount that you would pay for this investment?
+
+* The maximum amount you are willing to pay is the present value of the future cash flow
+
+```{r}
+
+#Method 1
+rate = 1 + (0.1/12) #10% divided by 12 
+PV = 1000/(1 + (0.1/12))^12 + 2000/(1 + (0.1/12))^24 + 3000/(1 + (0.1/12))^36 + 500/(1 + (0.1/12))^48
+PV
+  
+
+#Method 2
+
+EAR = (1+0.1/12)^12
+PV = 1000/EAR + 2000/EAR^2 + 3000/EAR^3 + 500/EAR^4
+PV
+
+
+```
+
+### Future value of multiple ammounts
+
+The future value of a stream of cash flows can be determined by the following equation:
+
+$$ FV = \sum_{t=1}^{n} CF_{t} (1 + r)^{n-t} $$
+
+* FV = future value of multiple cash flows
+* $CF_{t}$ = cash flow received in period t 
+* r = compound interest rate
+* t = the number of periods before $CF_{t}$  is received or paid
+
+Example:
+I have an opportunity to purchase an asset that will provide me with some income to supplement my regular earnings. It is expected to pay me $3150 at the end of each month. What is the accumulated value of this asset after 6 months assuming an interest rate of 5% p.a. compounding monthly?
+
+```{r}
+
+r = (1 + 0.05/12)
+
+FV = (3150*(r)^(6-1) + 3150*(r)^(6-2) + 3150*(r)^(6-3) + 3150*(r)^(6-4)  + 3150*(r)^(6-5)) +3150*(r)^(6-6)
+FV
+
+```
+
+## Annuities
+Annuities are a special case of multiple cash flow streams where the cash flows are of equal size and occur at regular time intervals.
+
+Examples include:
+
+* A constant payment made to retirees throughout the remainder of their lives
+* Rentals paid in arrears
+* Interest payments on a bond
+
+
+
+
+### Ordinary annuity
+* Cash flows occur at the end of each period and, hence, the first cash flow occurs at the end of the first year.
+
+To determine the present value of an **ordinary annuity** of \$A:
+
+$$ PV = A \times \frac{1-(1+r)^{-n}} {r}  $$
+
+* Inside the bracket is called the **annuity factor**
+* PV = present value
+* A = value of cash flow paid/received
+* n = number of cash flows that form the annuity
+* r = compound interest rate per period
+
+Example:
+If you receive $1000 at the end of each year from your grandparents for four years and reinvest the cash flows at 5% p.a. compounded annually, what is the current value of this CF stream?
+
+
+```{r}
+#Method 1
+A = 1000
+r = 0.05
+n = 4
+
+PV = A*((1-(1+r)^{-n})/r)
+PV
+
+```
+
+To determine the future value of an **ordinary annuity** :
+
+$$ FV = A \times \frac{(1+r)^{n}-1)}{r} $$
+
+* PV = present value
+* A = value of cash flow paid/received
+* n = number of cash flows that form the annuity
+* r = compound interest rate per period
+
+NOTE:
+
+* No cash flow at time 0
+* There **IS** a cash flow at time n
+
+Example:
+
+If you receive $1000 at the end of each year from your grandparents for four years and reinvest the cash flows at 5% p.a. compounded annually, what is the accumulated value of this CF stream?
+
+```{r}
+A = 1000
+n = 4
+r = 0.05
+
+A* ((1+r)^n - 1)/r #RHS is annuity factor
+
+
+```
+
+### Annuity due
+* Cash flows occur at the beginning of each period and, hence, the first cash flow occurs immediately.
+
+
+To determine the **present value** of an annuity due:
+
+$$ PV = A + A\times \frac{1-(1+r)^{(-n-1)}}{r} $$
+
+* if it says first payment due immediately it is an annuity due question
+
+
+NOTE: Example Invalid, come back and review
+
+Example:
+What is the present value of a $1000 annuity that pays five regular semi-annual payments when the interest rate is 10% p.a. compounding quarterly with the first payment due immediately?
+
+Step 1: find r:
+
+Need to apply effective rate formula from class one to find r
+
+$$ Effective Rate =  (1 + \frac{r_{nom}}{m})^{mn} - 1 $$
+
+* $r_{nom}$ = 0.1
+* m = 4
+* n = 2
+
+$$ Effective Rate =  (1 + \frac{0.1}{4})^{4\times2} - 1 $$
+
+
+* A = 1000
+* r = $ \frac {0.1}{4} $
+* n = 5
+
+$$ PV = 1000 + 1000\times \frac{1-(1+0.025)^{(-5-1)}}{0.025} $$
+
+
+### Deferred annuity
+* The first cash flow in an annuity is delayed by x periods.
+
+To determine the **present value** of a deferred annuity:
+
+$$ PV = A \ \times \frac{(1-(1+r)^{-n}} {r}/(1+r)^{x-1} $$
+where:
+
+* x = the number of periods before the first cash flow occurs
+
+Example:
+
+What is the present value of an asset that commences paying cash flows of $2 million in three years’ time for four years, when the interest rate is 8.25% p.a. compounding annually?
+
+* r = 0.0825
+* A = 2000000
+* n = 4
+* x = 3
+
+$$ PV = 2000000 \ \times \frac{(1-(1+0.0825)^{-4}} {0.0825}]/(1+0.0825)^{3-1} $$
+
+PV = $5,621,712.793
+
+### Growing annuity
+* Cash flows grow at a constant rate until the end.
+
+$$ PV = \frac{CF_{1}}{(r -g)} \times (1 - \frac{(1+g)^{n}}{(1+r)^{n}}) $$
+
+Example:
+
+Your parents want to setup an investment fund to fund your 4 year Bachelors degree. The tuition fee is $40,000 per semester payable at the end of the semester. The tuition fee is expected to grow at 4% p.a. compounding semi-annually and the investment fund is predicted to return 6.5% p.a. compounding semi-annually. Calculate the amount the fund must have when you start at USYD.
+
+* r = $\frac{6.5}{2}$
+* g = $\frac{0.4}{2}$
+* $CF_{1}$ = 40000
+* n = 8
+
+$$ PV = \frac{40000}{(0.0325 -0.02)} \times (1 - \frac{(1+0.02)^{8}}{(1+0.0325)^{8}}) $$
+
+PV = 297108.06
+
+
+### Equivalent annuity
+* Comparison of mutually exclusive opportunities with unequal lives.
+
+NOTE: not assessable in quizes
+is assessable in exam
+
+1. calculate present value of a cash flow stream
+2. Determining an annuity whose present value is equal to this cash flow stream
+
+Example:
+
+You are looking at buying a new printing machine for your factory. You have two machines to choose from. Both perform the same function. Machine A lasts for 4 years whilst Machine B lasts for 7 years. The required rate of return is 10% p.a. compounding annually.
+
+
+### Constant perpetuity
+
+The present value of a constant CF perpetuity:
+
+$$ PV = \frac{CF}{r} $$
+* PV = present value of perpetuity
+* CF = cash flow received/paid under the perpetuity
+* r = the compound interest rate per period
+
+Constant growth perpetuities are a special type of perpetuity where the cash flows are expected to grow at a constant rate forever.
+
+The present value of a **constant growth perpetuity**:
+
+$$ PV = \frac{CF_{1}}{r-g} $$
+
+where 
+
+* g = constant growth rate
+* NOTE: r > g
+
+Example:
+If the interest rate is 8.5% p.a., which investment is most desired?
+
+* An investment that offers you $1000 a year in perpetuity with the cash flow at the end of each year.
+
+$$ PV_{1} = \frac{1000}{0.085} $$
+$ PV_{1}  = 11764 $
+
+
+* A similar investment with the $1000 receipt at the beginning of each year with the first receipt starting today.
+
+$$ PV_{2} = 1000 + \frac{1000}{0.085} $$
+$ PV_{2} = \$12764.71$
+
+* A similar investment with the $1000 cash inflow spread evenly over each year.
+
+Given it is spread over the year, this will automatically be less than option 2 as the "evenly spread installment" is being discounted over the year as value of cash declines
+
+* A similar investment giving $1000 paid at the end of the first year and which
+would grow at a constant rate of 0.4% p.a. forever.
+
+$$ PV = \frac{1000}{0.085 - 0.04} $$
+
+$PV_{4} = \$12345.68$
+

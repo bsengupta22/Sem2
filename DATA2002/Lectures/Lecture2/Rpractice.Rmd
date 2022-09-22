@@ -1,0 +1,69 @@
+---
+title: "Rpractice"
+author: "Billy"
+date: "2022-08-14"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R practice
+
+```{r}
+
+library(gapminder)
+library(dplyr)
+
+gapminder
+
+groupbytest = gapminder |> group_by(year, continent) |>
+  summarise(mean_lifeExp = mean(lifeExp))
+
+groupbytest
+
+
+
+```
+
+```{r}
+d = 1:9
+counts = c(146, 79, 72, 41, 40, 36, 26, 29, 31)
+dat = data.frame(d, counts)
+
+probability=log((1+d), base=10)
+
+probabilityvector = probability*d
+probabilityvector
+
+```
+
+```{r}
+
+d = 1:9
+counts = c(149, 102, 62, 42, 37, 30, 27, 29, 22)
+dat = data.frame(d, counts)
+
+n=sum(counts)
+n
+k=length(counts)
+k
+
+lam=sum(counts*d/n)
+lam
+
+probability=log((1+d), base=10)
+probability
+
+ecounts=probability*n
+ecounts
+
+t0=sum((counts-ecounts)^2/ey)
+t0
+
+chisq=chisq.test(counts, probability)
+chisq
+
+```
+

@@ -1,0 +1,84 @@
+---
+title: "LO4"
+author: "Billy"
+date: "2022-08-10"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Poisson distribution
+A **Poisson** random variable represents the probability of a given number of events occurring in a fixed interval (e.g. number of events in a fixed period of time) if these event occur independently with some known average rate γ per unit time.
+
+If X is a Poisson random variable with rate parameter γ, the probability mass function is:
+
+$$ P(X=k)=e^{-\lambda} \frac{\lambda^{k}}{k !}, k=0,1,2, \ldots $$
+
+
+𝜆= 2
+
+```{r}
+plot(table(rpois(n=10000, lambda=2)), 
+     ylab = "Count")
+
+```
+
+𝜆 = 6
+
+```{r}
+
+rpois(n=10000, lambda=6) |> table() |> 
+  plot(ylab = "Count")
+
+
+```
+
+## Chi-squared tests for discrete distributions
+Suppose we have a sample of observations x1,x2,…,xn.
+
+We want to test whether the sample is taken from a population with a given distribution function F0(x|θ1,θ2,...,θh) where θl are parameters of the distribution.
+
+We summarise the observed data by tabulating the observed frequencies yi for each possible outcome and compare them to the corresponding expected frequencies, ei, calculated using the expected probabilities, pi, from the hypothesised distribution, F0(x|θ1,θ2,...,θh).
+
+This is a general chi-squared goodness-of-fit test with test statistic,
+
+$$ T=\sum_{i=1}^{k} \frac{\left(Y_{i}-e_{i}\right)^{2}}{e_{i}}=\sum_{i=1}^{k} \frac{\left(Y_{i}-n p_{i}\right)^{2}}{n p_{i}} $$
+
+where i=1,2,…,k iterates over the distinct outcomes.
+
+
+## Chi-squared tests for discrete distributions
+However the model parameters θ1,θ2,…,θh are usually unknown and have to be estimated from the sample.
+
+In this case, the expected probabilities pi are replaced by their estimates p̂ i.
+
+Then the observed test statistic is
+
+$$ t_{0}=\sum_{i=1}^{k} \frac{\left(y_{i}-n \hat{p}_{i}\right)^{2}}{n \hat{p}_{i}} $$
+
+and the approximate p-value is
+
+$$ P\left(\chi_{k-1-q}^{2} \geq t_{0}\right) $$
+
+Note the degrees of freedom are k−1−q where q is the number of parameters we need to estimate.
+
+
+### Example: Radiation exposure
+Let X be a random variable such that X∼Poisson(λ).
+
+Let yi be the observed frequency of outcome i.
+
+The expected probabilities pi are given by the probability mass function,
+
+$$ P(X=i)=p_{i}=e^{-\lambda} \frac{\lambda^{i}}{i !} \quad \text { for } i=0,1,2, \ldots $$
+
+where pi denote the probability of the number of chromosome aberrations in the i-th category.
+
+Note that for a Poisson distribution both E(X) and Var(X) are equal to the parameter λ.
+
+
+
+
+

@@ -1,0 +1,137 @@
+---
+title: "LO11"
+author: "Billy"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+# LO11, Confidence Intervals, Rejection regions and Critical values
+
+
+## Random Variable Basics
+
+
+- a random variable is a mathematical object which takes certain values with certain probabilities
+- we have *discrete* and *continuous* random variables although we can always approximate a continous one with a discrete one
+- A simple discrete random variable X can be described as a *single random* draw from a "box" containing tickets, each with numbers written on variable
+  + F(X) = $\mu$ (the average of numbers in the box)
+  + Var(X) = $\sigma^{2}$ (the population *variance* of the numbers in the box)
+  + SD(X) = $\sigma$
+
+## Random sample with replacement
+
+- consider a sample with size n written as $X_{1},X_{2}, ... , X_{n}$
+- this means all possible samples of size n is chosen in such a way that each is equally likely
+- if there are N tickets in a box, how many such samples are there
+- It turns out that these X's are *independent and identically distributed*. This means:
+  + each X has the sample distribution as a single draw
+  + The X's are all mutually independent
+- Consider now taking the total $T=\sum_{i=1}^{n} X^i$
+- What is E(T)?
+- What is Var(T)?
+
+## Expectations and Variance of sums
+
+The expectation is always the sum of the expectations
+
+$$ E(T) = E(X_{1} + X_{2} ... + X_{n}) = \mu \times n$$
+Variance is the sum of independent random variables
+- The variance of a sum is not always the sum of the variances
+However, it is if the X' are independent:
+
+$$ Var(T) = Var(X_{1} + X_{2} ... + X_{n}) = \sigma^{2} \times n $$
+
+Multiplying by a constant for any random variable X and any constant c
+
+$$ E(cX) = c(E(X) $$ and $$ Var(cX) = c^{2}(Var(X)) $$
+
+
+![](/Users/sengwill20/Desktop/DATA2002/Random/SampleMean.png)
+
+
+## Estimating \mu
+
+- in many applications we take data and we are interested in *estimating* or *learning* \mu
+- in this case, the *estimator* is the sample mean: $\bar{X}$
+- This estimate is $\bar{x} = \sum_{i=1}^{n}x^{i}$, the observed value of the mean of the data (this is differnt to $bar{X}$)
+- An important theoretical quantity is the *standard error*, the *standard deviation* of the estimator
+$$ SF = SD(\bar{X}) = \sqrt{(Var{\bar{X}})} = \frac{\sigma}{\sqrt{n}} $$
+
+This is (in general) also an *unknown parameter*
+
+## Importance of Standard Error
+
+- The standard error (standard deviation of the estimator) is important to know, since it tells us the “likely size of the estimation error”.
+- An estimate on its own is not very useful, we need to also know how accurate or reliable the estimate is.
+  + This is what the standard error provides.
+- Unfortunately in most contexts the standard error is also unknown;
+  + but we can usually (also) estimate the standard error!
+
+
+ ![](/Users/sengwill20/Desktop/DATA2002/Random/EstimatingSTERR.png)
+
+# Critical Values and Confidence Intervals
+  
+## More precise inference
+
+- Usually, we want to know if a given value $\mu_0$ is a “plausible value” for the unknown $\mu$, based on observed data $x_1,…,x_n$.
+
+Roughly speaking, we do this by
+
+1. computing the value of the *estimate* $\bar{x}$;
+
+2. computing the value of the *estimated standard error* $\frac{s}{\sqrt{n}}$;
+
+3. seeing if the discrepancy $\bar{x}$ − $\mu_0$ is “large” compared to the standard error.
+
+The various procedures we look at:
+
+- t-tests (with corresponding p-values)
+  + confidence intervals
+  + rejection regions
+  + are all variations on this single idea.
+  
+  
+## What kind of discrepancies are of interest?
+
+We need to have it very clear in our minds which kind of discrepancies $ x -\mu_0$  we are interested in:
+
+- positive
+- negative
+- both
+
+Another way to think about it is, given a fixed $\mu_0$ of interest and an observed sample mean $\bar{x}$, which of the following questions are we asking:
+
+- Is $\bar{x}$ significantly more than $\mu_0$? (one-sided)
+- Is $\bar{x}$ significantly less than $\mu_0$? (one-sided)
+- Is $\bar{x}$ significantly different to $\mu_0$? (two-sided)
+
+### Example Beer Contents
+
+Beer contents in a 6 pack in milliliters are : 374.8, 375.0, 375.3, 374.8, 374.4, 374.9
+
+*Does the mean beer content differ from the 375 ml claimed on the label?*
+
+```{r}
+x = c(374.8, 375.0, 375.3, 374.8, 374.4, 374.9)
+mean(x)
+```
+
+```{r}
+sd(x)
+```
+
+
+- for consumers, the only interest they have is if bottles are being *underfilled*
+- for producer, they dont want to be *underfilling* or *overfilling* 
+- thus a one sided and two sided POV are interesting for this example
+
+ ![](/Users/sengwill20/Desktop/DATA2002/Random/TwoSided.png)
+
+## How to choose the constant c?
+
+- The constant c can be chosen in a sensible way in each context.
+- **Testing:** control the *false alarm rate*.
+- **Confidence intervals:** *control the coverage probability*;
+  + the coverage probability is commonly also called the confidence level and expressed as a percentage.
+

@@ -1,0 +1,99 @@
+---
+title: "Practice R markdown 2 lab1"
+author: "Billy"
+date: "2022-08-01"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is how i download my packages
+
+```{r}
+library("ggplot2")
+library("dplyr")
+library("readr")
+library("palmerpenguins")
+
+```
+
+## My Plots
+
+From this i designed these plots
+
+```{r}
+
+library("ggplot2")
+penguins %>%
+  ggplot() + 
+  # add the aesthetics
+  aes(x = body_mass_g, 
+      y = flipper_length_mm,
+      colour = species) +
+  # add a geometry
+  geom_point() + 
+  # tidy up the labels
+  labs(x = "Body mass (g)",
+       y = "Flipper length (mm)",
+       colour = "Species")
+
+```
+
+
+```{r}
+
+
+x = c(1.83, 0.50, 1.62, 2.48, 1.68, 1.88, 1.55, 2.06, 1.30)
+y = c(0.878, 0.647, 0.598, 2.05, 1.06, 1.29, 1.06, 3.14, 1.29)
+
+z=c(x-y)
+
+# null is therapy decreases depression
+
+z
+
+#one sided alternative hypothesis, we are expecting differences to be negative
+
+boxplot(z, xlab = "Difference in depression after therapy", horizontal = TRUE)
+
+depression_calc=data.frame(dif = z, 
+                           absdif = abs(z),
+                           rankAbsDif = rank(abs(z)),
+                           signrank = sign(z) * rank(abs(z)))
+depression_calc
+
+depression_calc %>% 
+  filter(signrank >0) %>% 
+  summarise(sum(signrank)) %>% 
+  pull()
+
+
+
+#Hypothesis, alternative is that the difference is less
+
+psignrank(34, 9, lower.tail = TRUE)
+
+
+```
+
+```{r}
+library(tidyverse)
+
+hypothesised_iq=107
+x = c(90, 100, 105, 107, 108, 109, 119, 127, 130)
+x1 = x-107
+x1
+
+
+wilcox.test(x1)
+
+
+
+
+
+```
+

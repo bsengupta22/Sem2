@@ -1,0 +1,279 @@
+---
+title: "FINC2011W1"
+author: "Billy"
+date: "2022-08-09"
+output: html_document
+---
+
+## Formulas and examples week 2
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Simple Interest
+
+FV = PV + interest
+
+FV = Future value
+
+PV = Present value
+
+r = simple interest rate each period
+
+n = number of periods
+
+
+
+$$ FV = PV(1+(rn )) $$
+
+If simple interest is applied to periods of less than 1 year, the interest rate is:
+
+
+$$ 1+(r(dtm/365)) $$
+where dtm represents days to maturity
+
+Example:
+A credit union pays savers at 5% p.a. simple interest. If $1000 is invested today, how much would the account accrue in 4 years?
+
+```{r}
+pv = 1000
+r = 0.05
+n = 4
+fv = pv*(1+(r * n ))
+
+fv
+
+```
+
+### Compound Interest
+
+The formula for the future value under compound interest is:
+$$
+
+FV = PV(1+r)^n
+
+$$
+where:
+
+  FV = the accumulated amount in period n
+  
+  PV = the initial amount invested or borrowed
+  
+  r = the interest rate per period
+  
+  n = the number of periods
+
+The formula for present value under compound interest is:
+
+$$ PV=(FV)/(1+r)^n $$
+
+Example
+If the savings interest rate is 2.35% p.a. How much would you have to set aside now to provide this sum in five years’ time assuming the drive away price on these cars remain constant?
+
+* car1: $152219
+
+* car2: $32326
+
+NOTE: if the bank compounds quarterly, you must divide the per annum rate by 4 to find the rate
+
+```{r}
+
+FV1 = 152219
+FV2 = 32326
+r = 0.0235
+n = 5
+
+
+
+PV1=(FV1)/(1+r)^n
+PV1
+
+PV2=(FV2)/(1+r)^n
+PV2
+
+```
+Example:
+
+If the present value of \$1.00 received n years from today at an interest rate of r% p.a. compounded annually is 0.751, then what is the future value of \$1.00 invested today at an interest rate of r% p.a. compounded annually for n years?
+
+To apply the formula, 
+
+```{r}
+
+proportion=1/0.751
+
+compoundeddollar=(proportion)*1
+compoundeddollar
+
+```
+
+Example:
+A credit union pays savers at 5% p.a. compound annually. If $1000 is invested today, how much would the account accrue in 4 years?
+
+```{r}
+pv=1000
+r=0.05
+n=4
+
+fv=pv*(1+r)^n
+fv
+```
+
+### Nominal and Effective Interest rates
+
+Compound interest rates can be quoted as a **nominal interest rate** or **effective interest rate**.
+
+#### Nominal interest rate
+
+Quoted annual interest rate that is adjusted to match the frequency of payments or compounding by taking a proportion of the quoted nominal rate to obtain the actual interest rate per period.
+    
+10% p.a. compounded semi-annually = 5% per half-year
+    
+5.65% p.a. compounding monthly = 0.4708% per month
+    
+#### Effective interest rate
+Accounts for the true amount of interest that is earned on both reinvested interest and principal earned over a year
+
+Takes into account the effect of compounding
+
+$$ Effective Rate =  (1 + \frac{r_{nom}}{m})^{mn} - 1 $$
+
+rnom = the nominal rate
+
+m = the number of compounding periods underlying the nominal rate
+
+n = the period/s of the effective rate
+
+    
+Example:
+What is the effective annual interest rate on the outstanding balance on a credit card if the nominal rate quoted on the card is 15.75% per annum compounding daily?
+
+```{r}
+
+rnom = 0.1575
+m = 365
+n = 1
+
+effective_annual = (1 + (rnom/m))^m*n - 1
+effective_annual
+```
+
+Example:
+If a loan that charges 14% p.a. annual interest with monthly compounding cheaper than a loan with a 14.75% p.a. interest rate with annual compounding? Would you prefer a loan with a 14.5% p.a. interest rate with semi-annual compounding instead?
+
+```{r}
+
+rnom = 0.14
+m = 12
+n = 1
+
+effective_annual_1 = (1 + (rnom/m))^m*n - 1
+effective_annual_1
+
+
+rnom = 0.1475
+m = 1
+n = 1
+
+effective_annual_2 = (1 + (rnom/m))^m*n - 1
+effective_annual_2
+
+
+rnom = 0.14
+m = 2
+n = 1
+
+effective_annual_3 = (1 + (rnom/m))^m*n - 1
+effective_annual_3
+
+
+```
+First option is an effective annual interest rate of 14.9%
+
+Second option is an effective annual interest rate f 14.75%
+
+Third option is an effective annual interest rate of 14.49%
+
+
+Therefore, yes as third option is cheapest over one year
+
+
+## Simple Interest rate vs Compound Interest rate
+
+A comparison of simple interest with compound interest can be made by converting the compound interest into an equivalent simple interest rate:
+
+$$ \text { Simple interest rate } \times n=(1+\text { compound interest rate }_m)^{m n}-1 $$
+
+where:
+
+  compounding interest rate_m = interest rate with compounding frequency m
+  
+  m = the compounding interval
+  
+  n = the number of years over which the amount is invested or borrowed
+
+Example:
+A bank pays interest at 3.5% p.a. compounded annually. If $1000 is invested for five years, what is the equivalent simple interest rate that the amount will earn? What if the bank pays interest at the same interest rate of 3.5% p.a. but the rate is compounded monthly instead?
+
+```{r}
+
+Comp_in_m= 0.035
+Comp_in_m2 = 0.035/12
+PV=1000
+m=1
+m2=12
+n=1
+
+simple_interest_rate1 = (1+Comp_in_m)^m*n - 1
+simple_interest_rate1
+
+simple_interest_rate2 = (1+Comp_in_m2)^m2*n - 1
+simple_interest_rate2
+
+```
+Simple interest rate for option one is 3.5% per annum
+Simple interest rate for option two is 3.6% per annum
+
+## Continuous Compounding
+
+exp(1) represents e in r
+
+exp(2) represents e^2, therefore exp(rt) represents e^rt
+
+The accumulated value (FV) of an amount invested at a continuously compounding rate of interest:
+
+$$ FV=PV e^{r t} $$
+
+PV = the initial amount invested or borrowed
+
+r = the continuously compounded rate of return
+
+t = the time over which the cash flow is invested or borrowed
+
+e = the base of natural logarithm, a constant equal to 2.718
+
+Example:
+On Monday 3 rd February 2020, Lend Lease Corporation (LLC) opened for trading at a price of \$14.46, and on Friday of the same week, it closed at a price of $14.08. If you bought LLC shares at the opening price on Monday and sold them at the closing price on Friday, what is the continuously compounded rate of return you would have earned in this 5 day holding period?
+
+Here FV = 14.08
+
+PV = 14.46
+
+t=1 (default if not specified)
+
+with algebra we find e^r = 14.08/14.46 and therefore r = ln(FV/PV)
+
+```{r}
+library("SciViews")
+FV = 14.08
+PV = 14.46
+
+rate=ln(FV/PV)
+rate
+
+
+```
+
+
+

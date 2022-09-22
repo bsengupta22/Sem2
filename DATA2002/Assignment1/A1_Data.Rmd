@@ -1,0 +1,462 @@
+---
+title: "A1Data"
+author: "Billy"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+### Downloading data
+
+This downloads the data
+
+```{r, warning = FALSE, message=FALSE}
+library(tidyverse)
+library(dplyr)
+x = readr::read_tsv("DATA2x02 survey (2022) - Form responses 1 (1).tsv")
+
+view(x)
+
+x[-155,] #delets row with improbable data
+```
+
+the old names are bad to program with, so they have been rewritten
+
+```{r, warning = FALSE, message = FALSE}
+library(dplyr)
+x = readr::read_tsv("DATA2x02 survey (2022) - Form responses 1 (1).tsv")
+
+old_names = colnames(x)
+new_names = c("timestamp","covid_positive","living_arrangements","height","uni_travel_method","uni_travel_listen","spain_budget","feel_overseas","feel_anxious","study_hrs","read_news","study_load","work","lab_zoom","social_media","gender","sleep_time","wake_time","random_number","steak_preference","dominant_hand","normal_advanced","exercise_hrs","employment_hrs","city","weekly_saving","hourly_plan","weeks_behind","assignment_on_time","used_r_before","team_role","data2x02_hrs","social_media_hrs","uni_year","sport","wam","shoe_size","decade_selection")
+# overwrite the old names with the new names:
+colnames(x) = new_names
+# combine old and new into a data frame:
+name_combo = bind_cols(New = new_names, Old = old_names)
+name_combo %>% gt::gt()
+
+```
+
+Looking at the data thats missing may give insight into bias in variables (some people wont feel comfortable entering certain data)
+
+
+```{r}
+library("dplyr")
+library("tidyverse")
+library("data.table")
+test3 <- data.table(x$uni_year, x$assignment_on_time)
+test3 <- as.data.frame(test3)
+test3 <- test3 %>% na.omit()
+colnames(test3) = c("uni_year", "assignment_on_time")
+
+
+first_always = test3 %>% select(uni_year, assignment_on_time) %>% 
+  filter(uni_year =="First year" & assignment_on_time == "Always")
+second_always = test3 %>% select(uni_year, assignment_on_time) %>% 
+  filter(uni_year =="Second year" & assignment_on_time == "Always")
+third_always = test3 %>% select(uni_year, assignment_on_time) %>% 
+  filter(uni_year =="Third year" & assignment_on_time == "Always")
+fourth_always = test3 %>% select(uni_year, assignment_on_time) %>% 
+  filter(uni_year =="Fourth year" & assignment_on_time == "Always")
+fifth_always = test3 %>% select(uni_year, assignment_on_time) %>% 
+  filter(uni_year =="Fifth or higher year" & assignment_on_time == "Always")
+
+first_sometimes = test3 %>% select(uni_year, assignment_on_time) %>% 
+  filter(uni_year =="First year" & assignment_on_time == "Sometimes")
+second_sometimes = test3 %>% select(uni_year, assignment_on_time) %>% 
+  filter(uni_year =="Second year" & assignment_on_time == "Sometimes")
+third_sometimes = test3 %>% select(uni_year, assignment_on_time) %>% 
+  filter(uni_year =="Third year" & assignment_on_time == "Sometimes")
+fourth_sometimes = test3 %>% select(uni_year, assignment_on_time) %>% 
+  filter(uni_year =="Fourth year" & assignment_on_time == "Sometimes")
+fifth_sometimes = test3 %>% select(uni_year, assignment_on_time) %>% 
+  filter(uni_year =="Fifth or higher year" & assignment_on_time == "Sometimes")
+
+first_usually = test3 %>% select(uni_year, assignment_on_time) %>% 
+  filter(uni_year =="First year" & assignment_on_time == "Usually")
+second_usually = test3 %>% select(uni_year, assignment_on_time) %>% 
+  filter(uni_year =="Second year" & assignment_on_time == "Usually")
+third_usually = test3 %>% select(uni_year, assignment_on_time) %>% 
+  filter(uni_year =="Third year" & assignment_on_time == "Usually")
+fourth_usually = test3 %>% select(uni_year, assignment_on_time) %>% 
+  filter(uni_year =="Fourth year" & assignment_on_time == "Usually")
+fifth_usually = test3 %>% select(uni_year, assignment_on_time) %>% 
+  filter(uni_year =="Fifth or higher year" & assignment_on_time == "Usually")
+
+
+first_never = test3 %>% select(uni_year, assignment_on_time) %>% 
+  filter(uni_year =="First year" & assignment_on_time == "Never")
+second_never = test3 %>% select(uni_year, assignment_on_time) %>% 
+  filter(uni_year =="Second year" & assignment_on_time == "Never")
+third_never = test3 %>% select(uni_year, assignment_on_time) %>% 
+  filter(uni_year =="Third year" & assignment_on_time == "Never")
+fourth_never = test3 %>% select(uni_year, assignment_on_time) %>% 
+  filter(uni_year =="Fourth year" & assignment_on_time == "Never")
+fifth_never = test3 %>% select(uni_year, assignment_on_time) %>% 
+  filter(uni_year =="Fifth or higher year" & assignment_on_time == "Never")
+
+
+first_year=c(nrow(first_always), nrow(first_sometimes), nrow(first_usually), nrow(first_never))
+second_year =c(nrow(second_always), nrow(second_sometimes), nrow(second_usually), nrow(second_never))
+third_year = c(nrow(third_always), nrow(third_sometimes), nrow(third_usually), nrow(third_never))
+fourth_year = c(nrow(fourth_always), nrow(fourth_sometimes), nrow(fourth_usually), nrow(fourth_never))
+fifh_year = c(nrow(fifth_always), nrow(fifth_sometimes), nrow(fifth_usually), nrow(fifth_never))
+
+matrix_for_3 = matrix(c(nrow(first_always), nrow(first_sometimes), nrow(first_usually), nrow(first_never), 
+                        nrow(second_always), nrow(second_sometimes), nrow(second_usually), nrow(second_never), 
+                        nrow(third_always), nrow(third_sometimes), nrow(third_usually), nrow(third_never),
+                        nrow(fourth_always), nrow(fourth_sometimes), nrow(fourth_usually), nrow(fourth_never),
+                        nrow(fifth_always), nrow(fifth_sometimes), nrow(fifth_usually), nrow(fifth_never)), ncol = 5)
+
+
+matrix_for_3
+
+
+
+```
+
+```{r}
+
+
+test4 <- data.table(x$uni_year, x$sport)
+test4 <- as.data.frame(test4)
+test4 <- test4 %>% na.omit()
+colnames(test4) = c("uni_year", "sport")
+
+
+early_uni_no_sport = test4 %>% select(uni_year, sport) %>% 
+  filter(sport %in% c("I don't play any sport") & uni_year %in% c("First year", "Second year"))
+
+late_uni_no_sport = test4 %>% select(uni_year, sport) %>% 
+  filter(sport %in% c("I don't play any sport") & uni_year %in% c("Third year", "Fourth year", "Fifth or higher year "))
+
+early_uni_yes_sport = test4 %>% select(uni_year, sport) %>% 
+  filter(sport != c("I don't play any sport") & uni_year %in% c("First year", "Second year"))
+
+late_uni_yes_sport = test4 %>% select(uni_year, sport) %>% 
+  filter(sport != c("I don't play any sport") & uni_year %in% c("Third year", "Fourth year", "Fifth or higher year "))
+
+nrow(early_uni_no_sport)
+nrow(early_uni_yes_sport)
+matrix4 = matrix(c(nrow(early_uni_no_sport), nrow(early_uni_yes_sport), nrow(late_uni_no_sport), nrow(late_uni_yes_sport)), ncol = 2)
+
+colnames(matrix4) = c("Early uni", "Late uni")
+rownames(matrix4) = c("No sport", "Yes sport")›
+
+```
+
+```{r, warning = FALSE, message = FALSE}
+library(visdat)
+visdat::vis_miss(x)
+```
+
+```{r}
+library(dplyr)
+library("tidyverse")
+
+test2 <- data.table(x$work, x$study_load)
+test2 <- as.data.frame(test2)
+test2 <- test2 %>% na.omit()
+colnames(test2) = c("Work_load", "Study_load")
+
+
+cas_full = test2 %>% select(Work_load, Study_load) %>% 
+  filter(Work_load %in% c("Casual") & Study_load == "Full time")
+
+cas_part = test2 %>% select(Work_load, Study_load) %>% 
+  filter(Work_load == "Casual" & Study_load == "Part time")
+
+full_full = test2 %>% select(Work_load, Study_load) %>% 
+  filter(Work_load == "Full time" & Study_load == "Full time")
+
+full_part = test2 %>% select(Work_load, Study_load) %>% 
+  filter(Work_load == "Full time" & Study_load == "Part time")
+
+part_full = test2 %>% select(Work_load, Study_load) %>% 
+  filter(Work_load == "Part time" & Study_load == "Full time")
+
+part_part = test2 %>% select(Work_load, Study_load) %>% 
+  filter(Work_load == "Part time" & Study_load == "Part time")
+
+dw_full = test2 %>% select(Work_load, Study_load) %>% 
+  filter(Work_load == "I don't currently work" & Study_load == "Full time")
+
+dw_part = test2 %>% select(Work_load, Study_load) %>% 
+  filter(Work_load == "I don't currently work" & Study_load == "Part time")
+
+
+
+matrix_for_test = matrix(c(nrow(cas_full), nrow(cas_part), nrow(dw_full), nrow(dw_part), 
+                           nrow(full_full), nrow(full_part), nrow(part_full), nrow(part_part)), ncol = 4)
+colnames(matrix_for_test) = c("Casual work", "Dont work", "Full time work", "Part time work")
+rownames(matrix_for_test) = c("Full time Study", "Part time Study")
+
+
+graph = matrix_for_test %>% as.data.frame() %>% 
+  tibble::rownames_to_column(var = "StudyLoad") %>% 
+  tidyr::pivot_longer(c("Casual", "Dont", "Full time", "Part time"), 
+                      names_to = "WorkLoad", values_to = "count")
+
+
+p_base = ggplot(graph, aes(x = WorkLoad, y = count, fill = StudyLoad)) + 
+  theme_bw(base_size = 12) + 
+  scale_fill_brewer(palette = "Set1") + 
+  labs(fill = "", x = "Work Group") +
+  theme(legend.position = "top")
+
+p1 = p_base + 
+  geom_bar(stat = "identity") + 
+  labs(y = "Count") 
+p2 = p_base + 
+  geom_bar(stat = "identity", position = "fill") + 
+  labs(y = "Proportion")
+gridExtra::grid.arrange(p1, p2, ncol = 2)
+
+
+```
+
+```{r}
+data2902students = x %>% select(wam, normal_advanced) %>% 
+  filter(normal_advanced == "DATA2902")
+data2902students <- data2902students %>% na.omit()
+
+data2002students = x %>% select(wam, normal_advanced) %>% 
+  filter(normal_advanced == "DATA2002")
+data2002students <- data2002students %>% na.omit()
+
+
+norm_adv_basictable <- table(x$normal_advanced) %>% 
+                          as.data.frame() %>% 
+                              setNames(c("a", "b"))
+
+
+norm_adv_basictable$c = c(780,80)
+norm_adv_basictable <- transform(norm_adv_basictable, r=(b/c *100))
+norm_adv_basictable <- transform(norm_adv_basictable, w=c(mean(data2002students$wam), mean(data2902students$wam)))
+  
+norm_adv_basictable %>% gt() %>% 
+  tab_header(title = "Survey Responses", subtitle = "Data2002 vs Data2902") %>% 
+    cols_label(
+    a = "Course",
+    b = "Responses",
+    c = "Students",
+    r = "Response Rate (%)",
+    w = "WAM"
+  )
+```
+
+
+
+```{r, warning = FALSE, message = FALSE}
+library(naniar)
+library(ggplot2)
+
+data_frame_of_missing <- as.data.frame(colSums(is.na(x)))
+
+data_frame_of_missing
+
+
+barplot(t(as.matrix(data_frame_of_missing)), 
+        main = "Missigness of values", 
+        xlab = "Number of Missing Values", 
+        ylab = "Variables", 
+        names.arg = c(new_names),
+        col = "darkred",
+        horiz = TRUE)
+
+gg_miss_var(x) + labs(title = "Missingness of Data")
+
+```
+
+```{r}
+library(dplyr)
+library(tidyverse)
+set.seed(123)
+
+# removes hours per week that are greater than 25 and na values
+data_to_test1 = x$data2x02_hrs[! x$data2x02_hrs > 25] %>% na.omit()
+data_to_test1
+
+bp1 = boxplot(data_to_test1, main = "Time Studying Data2x02", ylab = "Hours per week")
+
+
+
+```
+
+Cleans Height//sorts height, might be worth removing 254 cm
+```{r}
+x = x %>% 
+  dplyr::mutate(
+    height_clean = readr::parse_number(height),
+    height_clean = case_when(
+      height_clean <= 2.5 ~ height_clean * 100,
+      height_clean <= 9 ~ NA_real_,
+      TRUE ~ height_clean
+    )
+  )
+height_clean_sorted=sort(x$height_clean)
+
+height_clean_sorted = height_clean_sorted[- 188]
+height_clean_sorted
+
+
+
+shapiro.test(height_clean_sorted)
+
+# Proves normal distribution
+# significance above 5% means the data is valid 
+
+```
+
+
+```{r}
+x = x %>% mutate(
+  gender_clean = gendercoder::recode_gender(gender)
+)
+x %>% janitor::tabyl(
+  gender, gender_clean
+) %>% gt::gt() %>% 
+  gt::tab_spanner(label = "Recoded outcomes", columns = 2:5) %>% 
+  gt::cols_label(gender = "Original outcomes")
+
+x$gender
+
+
+```
+
+
+Social media Clean
+```{r}
+x= x %>% mutate(
+  social_media_clean = tolower(social_media),
+  social_media_clean = str_replace_all(social_media_clean, '[[:punct:]]',' '),
+  social_media_clean = stringr::word(social_media_clean),
+  social_media_clean = case_when(
+    stringr::str_starts(social_media_clean,"ins") ~ "instagram",
+    stringr::str_starts(social_media_clean,"ti") ~ "tiktok",
+    stringr::str_starts(social_media_clean,"mess") ~ "facebook",
+    stringr::str_starts(social_media_clean,"n") ~ "none",
+    is.na(social_media_clean) ~ "none",
+    TRUE ~ social_media_clean
+  ),
+  social_media_clean = tools::toTitleCase(social_media_clean),
+  social_media_clean = forcats::fct_lump_min(social_media_clean, min = 10)
+)
+
+
+x %>% janitor::tabyl(social_media_clean) %>% 
+  arrange(desc(n)) %>% 
+  gt::gt() %>% 
+  gt::fmt_percent(columns = 3, decimals = 1) %>% 
+  gt::cols_label(social_media_clean = "Favourite social media platform") %>% 
+  gt::cols_align(align = "left", columns = 1)
+
+
+```
+
+
+  
+SPORT CLEAN
+```{r}
+library(dplyr)
+library(tidyverse)
+x = x %>% 
+  mutate(identifier = row_number()) %>% 
+  mutate(sport = replace_na(sport, "I Don't Play any Sport"))
+
+sport <- x %>%
+  dplyr::select(identifier, sport) %>% 
+  tidyr::separate_rows(sport,
+                       sep = ", ") %>% 
+  dplyr::mutate(sport = tools::toTitleCase(sport),
+                sport = factor(sport),
+                sport = forcats::fct_lump_min(sport, 2))
+
+
+
+
+
+
+```
+
+```{r, message = FALSE, waring=FALSE}
+library(tidyverse)
+library(dplyr)
+
+sport <- x %>%
+  dplyr::select(identifier, sport) %>% 
+  tidyr::separate_rows(sport,
+                       sep = ", ") %>% 
+  dplyr::mutate(sport = tools::toTitleCase(sport),
+                sport = factor(sport),
+                sport = forcats::fct_lump_min(sport, 2))
+
+sport
+
+sport_data <- data.frame(sport)
+sport_data
+
+sports_count=dplyr::count(sport_data, sport)
+
+sports_count
+sum(sports_count$n)
+
+
+aggregate(x = sports_count$n, 
+          by = list(sports_count$sport),
+          FUN=sum)
+
+
+
+
+
+
+```
+
+
+
+
+### Tinkering with data
+
+
+```{r}
+
+
+x %>% select(height, sport, dominant_hand) %>% filter(!complete.cases(.))
+
+study_hrs_clean = x %>% study_hrs %>% 
+
+
+```
+
+
+### Practice ggplot
+
+```{r}
+library(tidyverse)
+x %>% ggplot(aes(data2x02_hrs, wam)) +
+  geom_point(aes(colour = study_load), alpha = 0.5) + 
+  geom_smooth(method =lm) +
+  labs(x = "Hours Spent Studying Data 2x02 (per week)", y = "Weighted Average Mark")
+  
+unique(x$data2x02_hrs)
+
+boxplot(x$data2x02_hrs, plot = FALSE)$out
+
+
+```
+
+
+## practice ggstatsplot
+
+```{r}
+
+library("ggstatsplot")
+library("rstantools")
+library("ggstatsplot")
+boxplot(x$data2x02_hrs, plot = FALSE)$out
+
+boxplot(x$data2x02_hrs[!x$data2x02_hrs %in% boxplot.stats(x$data2x02_hrs)$out], ylab = "Time Studying Data2x02 (Hours per week)")
+
+
+```
+
+

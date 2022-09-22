@@ -1,0 +1,72 @@
+---
+title: "LO4_2"
+author: "Billy"
+date: "2022-08-11"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Doing our exampe in R
+
+
+```{r}
+y=c(117, 94, 51, 15, 0, 0, 0, 1) #inputting observed counts
+x= 0:7 #defining groups from y
+n = sum(y) # Finding sum of observations
+k = length(y) #number of groups
+(lam = sum((y*x)/n))
+
+p=dpois(x, lambda = lam) # x gives the groups (represents eh ith observations)
+p
+
+p[8] = 1 - sum(p[1:7]) # redifines 8th element to p≥7 not p(7)
+round(p, 5)
+
+ey = (n*p) #Calculates expected frequencies
+
+ey>=5 #checks assumption
+
+
+
+```
+
+
+Collapsing categories so that assumptions are met
+```{r}
+
+yr=c(y[1:3], sum(y[4:8])) #reduces category counts to 0,1,2,≥3
+eyr=c(ey[1:3], sum(ey[4:8])) #same thing for expected y
+all(eyr>=5) #final check assumptions are met
+pr=c(p[1:3], sum(p[4:8])) #reduces categories for probabilities 
+kr=length(yr) #length of reduced
+t0=sum((yr-eyr)^2/eyr) #test statistic
+pval = (1-pchisq(t0, df = kr -1 -1))
+
+
+```
+
+
+
+Using chisq.test function:
+
+```{r}
+
+chisq=chisq.test(yr, p = pr)
+chisq # This funciton doesnt know we have estimated lambda so the degrees of freedom is wrong
+
+
+```
+
+To fix this:
+
+```{r}
+
+chisq$statistic
+pchisq(unname(chisq$statistic), df = 2, lower.tail = FALSE)
+
+```
+
+

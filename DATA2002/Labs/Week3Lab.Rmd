@@ -1,0 +1,100 @@
+---
+title: "Week3Lab"
+author: "Billy"
+date: "`r Sys.Date()`"
+output: 
+        html_document
+        code_folding: true
+        toc: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Personality Excercise 3.1
+
+```{r}
+counts = c(41, 52, 46, 61, 58, 72, 75, 63, 80, 65)
+c_mat = matrix(counts, nrow = 2, byrow = TRUE)
+colnames(c_mat) = c("Open", "Conscientious", "Extrovert", "Agreeable",
+    "Neurotic")
+rownames(c_mat) = c("Business", "Social Science")
+
+chisq.test(c_mat, correct=FALSE)
+
+## By default, R has correct has true. It applies continuity correction when you make correct = False
+
+```
+
+## Shocking 3.2
+
+```{r}
+
+counts = c(12, 5, 4, 9)
+c_mat=matrix(counts, nrow = 2, byrow = TRUE)
+colnames(c_mat) = c("Wait together", "wait alone")
+rownames(c_mat) = c("High anxiety", "low anxiety")
+c_mat
+
+fisher.test(c_mat)
+
+chisq.test(c_mat)
+chisq.test(c_mat, correct = FALSE)
+chisq.test(c_mat, simulate.p.value = TRUE, B = 20000)  ## simulate p value is the monte carlo p value
+
+
+
+```
+
+
+## Asbestos 3.2
+
+```{r}
+library(dplyr)
+library(tidyverse)
+
+#1
+asbestos = matrix(c(310, 212, 21, 25, 7, 36, 158, 35, 102, 35, 0, 9, 17, 49, 51, 0, 0, 4, 18, 28), nrow = 5)
+colnames(asbestos) = c("None", "Grade 1", "Grade 2", "Grade 3")
+rownames(asbestos) = c("0-9", "10-19", "20-29", "30-39", "40+")
+y = asbestos %>% as.data.frame() %>% 
+  tibble::rownames_to_column(var = "years") %>% 
+  tidyr::gather(key = grade, value = count, -years)
+y$grade = factor(y$grade, levels = c("None", "Grade 1", "Grade 2", "Grade 3"), ordered = TRUE)
+ggplot(y, aes(x = years, y = count, fill = grade)) + 
+  geom_bar(stat = "identity", position = "fill") + scale_y_continuous(labels = scales::percent) +
+  theme_bw(base_size = 16) + 
+  scale_fill_brewer(palette = "Set1") + 
+  labs(fill = "", y = "Count", x = "Occupational exposure (yrs)")
+
+#2
+chisq.test(asbestos)
+
+# the chance of getting values as or extreme is very small
+
+
+#3
+
+row_totals=rowSums(asbestos) 
+col_totals=colSums(asbestos)
+B = 10000
+set.seed(123) #Gives the same set of data
+
+x = r2dtable(n = B,  
+           r=row_totals,
+           c=col_totals)
+
+chisq.test(x[[1]])$statistic
+
+
+
+```
+
+
+
+
+
+
+
+

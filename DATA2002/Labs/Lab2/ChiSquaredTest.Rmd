@@ -1,0 +1,68 @@
+---
+title: "Tablets"
+author: "Billy"
+date: "2022-08-08"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##Tablets
+
+```{r}
+
+library("tidyverse")
+y_i = c(102, 32, 12 + 4)
+p_i = c(0.69, 0.21, 0.07 + 0.03)
+n = sum(y_i)
+e_i = (n * p_i)
+t0=sum((y_i - e_i)^2/e_i)
+t0
+
+chisq.test(y_i, p = p_i)
+
+
+```
+
+```{r}
+
+library("tidyverse")
+y_i =c(44, 24, 13, 19)
+p_i = c(0.5, 0.2, 0.1, 0.2)
+n=sum(y_i)
+e_i=(n * p_i)
+t0=sum((y_i -e_i)^2/e_i)
+t0
+
+pval = pchisq(t0, 3, lower.tail=FALSE)
+pval
+
+chisq.test(y_i, p = p_i)
+
+
+```
+
+```{r}
+
+fdata = readxl::read_excel("ardd_fatalities_jun2022.xlsx", 
+                           sheet = 2, 
+                           skip = 4, 
+                           na = c("","-9"), 
+                           guess_max = 1e6) %>% 
+  janitor::clean_names()
+
+
+cdata = fdata %>% 
+  select(-road_user, -gender, -age, -age_group) %>% 
+  distinct() %>% 
+  group_by(crash_id) %>% 
+  slice(1) %>% 
+  ungroup() %>% 
+  mutate(hour = lubridate::hour(time))
+
+cdata
+
+```
+

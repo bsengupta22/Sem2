@@ -1,0 +1,163 @@
+---
+title: "Valuing Equity"
+author: "Billy"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+# Equity Valuation
+
+Similar to debt securities, equity securities are valued by calculating the PV of all cash flows generated.
+
+These cash flows consist of:
+
+1. Dividends
+  + Payments made to shareholders
+  + Future dividends are uncertain and not guaranteed
+  
+2. Share price
+  + Market price when sold on the stock exchange
+
+The current value of a share is influenced by its future value and the future value of future dividends
+
+
+## Valuation of ordinary shares
+
+an n year investor:
+
+$$ E = \frac{div_{1}}{1+r_{e}} + \frac{div_{2}}{(1+r_{e})^2} + \frac{div_{2}}{(1+r_{e})^3} ... + \frac{div_{n}}{(1+r_{e})^n}$$
+
+where:
+
+- E = price or value of equity security
+- $Div_{t}$ = dividend paid in period t
+- $r_{e}$ = required return on equity
+- n = number of time periods
+
+
+an infinite horizon investor:
+
+$$ E = \frac{div_{1}}{1+r_{e}} + \frac{div_{2}}{(1+r_{e})^2} + \frac{div_{2}}{(1+r_{e})^3} ... $$
+
+Consequently, the value of a future share is given by the present value of all future dividends that the company is expected to pay:
+
+where:
+
+$$ E = \Sigma_{t=1}^{\infty}  \frac{Div_{t}}{(1+r_{e})^t} $$
+
+- E = price or value of equity security
+- $Div_{t}$ = dividend paid in period t
+- $r_{e}$ = required return on equity
+
+
+### Constant Dividend model
+- assumes that companies pay a constant dividend in the long run
+
+the value of a share can be expressed as:
+
+$$ E = \frac{Div}{r_{e}} $$
+
+
+- E = price or value of equity security
+- $Div_{t}$ = dividend paid in period t
+- $r_{e}$ = required return on equity
+
+
+### Constant growth model
+- assumes that companies pay dividends that grow at a constant rate in the long run
+
+
+$$ E = \frac{Div_{1}}{r_{e} - g} $$
+where:
+
+- E = price or value of equity security
+- $Div_{t}$ = dividend paid in period t
+- $r_{e}$ = required return on equity
+- g = constant growth rate
+
+### Dividend discount models
+
+
+
+$$ E = \frac{Div_{1}}{r_{e} - g} $$ $$ E = \frac{Div}{r_{e}} $$
+The investors **required rate of return** is determined by
+- level of interest rates in economy
+- risk of the stock
+
+the firms **growth rate of future dividensds ** is determined by
+- the retention ratio = 1-payout ratio
+- return on requity (ROE)
+
+
+
+#### Estimating Growth
+
+Estimating growth is a key issue in the application of the constant growth model
+
+According to this mode, the dividend growth is derived from the earnings of a company
+- EPS (= total earnings/number of shares outstanding) which can be paid out as dividends or retained within the company
+- return on new investments is the ability to convert new investments into new earnings
+
+
+Using this model, the dividend growth rate can be expressed as 
+
+$$ g = (1 - payout ratio) \times ROE $$
+where:
+
+
+- g = expected rate of growth of future dividends
+- 1-payout ratio = retention rate or plowback ratio
+- payout ratio - dividend per share/earnings per share
+- ROE = return on equity capital
+
+Assumptions:
+- payout ratio is stable
+- estimated ROE is stable
+
+example:
+Our company forecasts to pay a $8.33 dividend next year, which represents 100% of its earnings. This will provide investors with a 15% expected return. Instead, we decide to plowback 40% of the earnings at the firm’s current return on equity of 25%. What is the value of the stock before and after the plowback decision?
+
+$$ g = (1 - payout ratio) \times ROE $$
+
+
+
+#### Two stage growth model
+
+- it is reasonable to assume that companies cannot maintain “super-normal” growth indefinitely.
+- The two-stage growth model allows for the assumption of two stages of growth – an initial phase where the growth rate is not a stable growth rate and a subsequent steady state where the growth rate is stable and expected to remain for the
+long term.
+
+#### Notes
+
+- life expectancy is the variable that changes the outcome the least
+  + its OK to assume that companies live forever
+  
+  
+  
+#Tutorial Sheet
+
+1. You wish to value a company that paid a dividend of \$1.23 per share yesterday.  Furthermore, you  are aware that five years ago the company paid a dividend of $0.80 and in the interim years the dividend paid has grown at a constant rate. 
+  + What has the annual growth rate in dividends been during the past five years? 
+  
+```{r, include = FALSE}
+g = (1.23/0.8)^(1/5) -1
+g
+
+```
+  
+
+$0.8 \times (1 + g)^5 = 1.23$ therefore $g = (1.23/0.8)^1{1/5} -1$ = 0.0894... = 9%
+
+  + If dividends are expected to grow at the same annual growth rate for the foreseeable future, what is the maximum price that you would be willing to pay for a share in the  company if you require a return on equity of 15% p.a.? 
+  
+```{r, include = FALSE}
+ans = (1.23*1.09)/(0.15-0.09)
+ans
+
+```
+
+E = $Div_{t +1}/(r - g)$
+
+E = 22.35
+
+

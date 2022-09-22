@@ -1,0 +1,133 @@
+---
+title: "ANOVA"
+---
+
+## Sleep
+
+```{r}
+sleep
+t.test(extra ~ group, data = sleep)
+```
+
+
+```{r}
+library(tidyverse)
+sleep_recode = sleep %>% dplyr::mutate(
+  group = forcats::fct_recode(group,
+                              Dextro = "1",
+                              Laevo = "2"
+  ) 
+)
+head(sleep_recode)
+```
+
+
+```{r}
+sleep_wide = sleep_recode %>% 
+  tidyr::pivot_wider(id_cols = ID,
+                     names_from = group,
+                     values_from = extra)
+sleep_wide
+```
+
+
+```{r}
+ggplot(sleep_wide, 
+       aes(x = Dextro, y = Laevo)) + 
+  geom_point(size = 5) + 
+  geom_abline(slope = 1, intercept = 0) 
+```
+
+
+```{r}
+t.test(extra ~ group, data = sleep, paired = TRUE)
+```
+
+
+## NZ rivers
+
+```{r}
+nzrivers = read_tsv("http://www.statsci.org/data/oz/nzrivers.txt")
+glimpse(nzrivers)
+```
+
+
+```{r}
+nzrivers %>% 
+  group_by(FlowsInto) %>% 
+  summarise(xbar = mean(Length),
+            med = median(Length))
+```
+
+
+```{r}
+ggplot(nzrivers, 
+       aes(x = FlowsInto, y = Length)) + 
+  geom_boxplot() + 
+  theme_classic(base_size = 32)
+```
+
+
+```{r}
+welch = t.test(Length ~ FlowsInto, data = nzrivers)
+welch
+```
+
+
+```{r}
+classical = t.test(Length ~ FlowsInto, data = nzrivers, var.equal = TRUE)
+classical
+```
+
+## How important is the equal variance assumption?
+
+```{r}
+B = 10000
+pval.Classical = pval.Welch = vector(length = B)
+set.seed(123)
+for(i in 1:B){
+  x = rnorm(100, sd = 1)          # both samples have the same mean
+  y = rnorm(20, sd = 3)           # smaller sample has bigger variance      
+  pval.Welch[i] = t.test(x, y)$p.val
+  pval.Classical[i] = t.test(x, y, var.equal = TRUE)$p.val
+}
+mean(pval.Welch < .05)        # Rejects about 5% of the time.
+mean(pval.Classical < .05)    # Rejects far too often!!
+```
+
+
+## Plant growth
+
+```{r}
+# built into R, load it into the environment
+data("PlantGrowth")
+library(ggplot2)
+ggplot(PlantGrowth, 
+       aes(y = weight, x = group, 
+           colour = group)) +
+  geom_boxplot(coef = 10) + 
+  geom_jitter(width=0.1, size = 5) + 
+  theme_bw(base_size = 36) + 
+  theme(legend.position = "none") +
+  labs(y = "Weight (g)",
+       x = "Group")
+```
+
+```{r}
+plant_anova = aov(weight ~ group, data = PlantGrowth)
+plant_anova
+summary(plant_anova)
+```
+
+### Check the assumptions?
+
+- Equal variance: the spread of each group looks roughly similar in the side-by-side boxplots above.
+- Normality
+
+```{r}
+PlantGrowth %>% ggplot() + 
+  aes(sample = weight) +
+  geom_qq() + geom_qq_line() + 
+  facet_wrap(~ group)
+  
+```

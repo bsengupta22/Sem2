@@ -1,0 +1,257 @@
+---
+title: "Risk and Return"
+author: "Billy"
+date: "`r Sys.Date()`"
+output: 
+  html_document: 
+    self_contained: true # Creates a single HTML file as output
+    code_folding: hide # Code folding; allows you to show/hide code chunks
+    code_download: true # Includes a menu to download the code file
+    toc: true # (Optional) Creates a table of contents!
+    toc_float: true # table of contents at the side
+---
+
+# Risk and Return
+
+## Realised Returns
+
+- a **realised return** or **cash return **measures the gains or loss on an investment
+
+$$Cash Return = Capital Gain + Income Stream$$
+$$Cash Return = (P_{t+1} - P_{t}) + Div_{t+1}$$
+
+- the **rate of return** is the **cash return** divided by the beginning asset price
+
+$$Rate Of Return = \frac{CashReturn}{BeginningPrice}$$
+$$Rate of Return = Capital Gain Yield + Dividend Yield$$
+
+$$R_{t+1} = \frac{(P_{t+1} - P_{t}) + Div_{t+1}}{P_{t}}$$
+$$R_{t+1} =ln(\frac{P_{t+1} + Div_{t+1}}{P_{t}})$$
+
+
+## Expected return and risk
+
+- **Expected or mean return** is what the investor expects to earn from an investment in the future
+
+- The expected return is th arithmetic average of specific returns over a specific period
+
+$$ E(r) = \bar{r} = \frac{r_{1} + r_{2} +...+r_{n}}{n} = \frac{1}{n}\Sigma_{t=1}^{n}r_{t}$$
+
+Example:
+The monthly returns of the S&P/ASX200 for the first six months of 2019 were (below). What is the expected return?
+
+```{r}
+library("data.table")
+Period = c("Jan 2019", "Feb 2019", "march 2019", "April 2019", "May 2019", "June 2019")
+Return =c(-0.022, -0.02, 0.034, 0.005, 0.059, -0.025)
+
+example2 = data.table(Period, Return)
+
+example2
+
+rbar = sum(Return)/6
+rbar
+
+```
+
+
+
+## Geometrix vs arithmetic average rates of return
+
+
+the **arithmetic average** rate of return answers the quesetion, "What was the average of the rates of return per period?"
+
+the **geometric or compound average** rate of return answers the question, "What was the growth rate of your investment?"
+
+![](/Users/sengwill20/Desktop/FINC2011/geomrate.png)
+
+Total risk  can be measured by the variance or standard deviation of returns
+
+**Variance** is the average fo squared difference between realised returns and the expected return. **Standard Deviation** is the square root of variance
+
+$$ Var= \sigma^2 =\frac{\Sigma_{t=1}^{n}(r_{t} - \bar{r})^2}{n-1}$$ 
+$$SD = \sqrt{Var}$$
+## Probability distribution
+
+- **Expected or mean return** is what the investor expects to earn from an investment in the future
+
+- The expected return is the *weighted average* of the possible returns, where the weights are determined by the probability that it occurs
+
+
+$$ E(r) = \bar{r} = (r_{1} \times P_{1}) + (r_{2} \times P_{2}) +...+ (r_{n}\times P_{n})$$
+# Portfolios
+
+- A **portfolio** is a group of assets
+- Holding a portfolio of assets reduces investment risk, but often with no effect on overall returns, because:
+  + Within the portfolio, individual assets are more volatile than the overall portfolio
+  + Poor returns on some assets could be offset by stronger returns on others
+- The overall portfolio return is “smoothed out”
+
+The portfolio expected return is a weighted average of the expected returns on individual securities that make up the portfolio, where weights correspond to the proportion of the portfolio accounted by each of the respective component assets.
+
+$$E(r_{p}) = \bar{r_{p}} = \Sigma_{i=1}^{n}w_{i}E(r_{i})$$ 
+
+The risk of a portfolio is measured by the variability or dispersion of the portfolio return around its mean or expected value.
+
+Unlike the expected return of a portfolio, risk of a portfolio is not a simple weighted average of the risk of individual security returns.
+
+A raw measure of the degree of association between two variables is the **covariance**:
+
+
+![](/Users/sengwill20/Desktop/FINC2011/covariance.png)
+
+
+- If a covariance is positive:
+  + An increase in returns on asset i is associated with a increase in returns on asset j, or
+  + A decrease in returns on asset i is associated with an decrease in returns on asset j
+- If a covariance is negative:
+  + An increase in returns on asset i is associated with a decrease in returns on asset j, or
+  + A decrease in returns on asset i is associated with an increase in returns on asset j
+- Hence:
+  + Positive/Negative covariance → positively/negatively correlated returns on two assets
+  
+Example:
+Calculate the covariance of  monthly returns on News Corp  and Newcrest Mining for the  last four months of 2019:
+
+```{r}
+Period = c("Sept", "Oct", "Nov", "Dec")
+Return_NWS = c(0.0623, -0.0456, -0.0150, 0.1839)
+Return_NCM = c(0.0110, 0.0870, 0.1867, -0.0871)
+
+mean_NWS = mean(Return_NWS)
+mean_NCM = mean(Return_NCM)
+
+return_table = data.frame(Period, Return_NWS, Return_NCM)
+calc_NWS = Return_NWS-mean_NWS
+calc_NCM = Return_NCM - mean_NCM
+
+calc_both = calc_NCM*calc_NWS
+covar = sum(calc_both)/3
+
+covar
+
+
+
+```
+
+## Correlation Coefficient
+
+An alternative, and closely related, measure of the degree of association between two securities is the correlation coefficient:
+
+$$\rho_{ij} = \frac{\sigma_{ij}}{\sigma_{i}\sigma{j}}$$
+where:
+- $\sigma_{ij}$ = covariance between securities i and j
+- $\sigma_{i}$ = standard deviation of security i
+- $\sigma_{i}$ = stadndard deviation of security j
+
+The correlation coefficient takes the covariance between two securities and standardises it by the product of the twosecurities’ standard deviations.
+- The effect of this standardisation is that the correlation coefficient will always lie between -1 and +1.
+- This provides a more interpretive measure of the strength of association between the securities – not just whether it is positive or negative.
+
+
+![](/Users/sengwill20/Desktop/FINC2011/correlscale.png)
+
+Example:
+Calculate the correlation coefficient for Telstra Corporation and Coles Group, given that the standard deviation of returns on the two stocks were 7.73% and 11.59% and the covariance is –0.000656.
+
+```{r}
+correl = -0.000656/(0.0773 * 0.1159)
+correl
+
+```
+
+
+## Portfolio Risk
+
+The risk of a portfolio is related to the riskiness of the stocks and the degree of covariance or correlation.
+
+
+![](/Users/sengwill20/Desktop/FINC2011/portfoliorisk.png)
+Example:
+
+Calculate the risk of a \$4 million portfolio, comprising \$2 million in Telstra Corporation and \$2 million in Coles Group. Their standard deviation of returns are 7.73% and 11.59% and the covariance of return on the stocks is -0.000656.
+
+```{r}
+var = (0.0773^2 * 0.5^2) + (0.1159^2 * 0.5^2) + 2*(0.5*0.5*-0.000656)
+risk = sqrt(var)
+risk
+
+
+```
+
+My mother invests 60% of her funds in stock A and the balance in stock B. The standard deviation of returns on A is 10% and on B it is 20%. Calculate the
+variance of portfolio returns, assuming:
+1. The correlation between the returns is 1.
+2. The correlation is 0.5.
+3. The correlation is 0.
+4. The correlation is -1.
+
+```{r}
+
+one = 1
+two = 0.5
+three = 0
+four = -1
+var1 = (0.1^2 * 0.6^2) + (0.2^2 * 0.4^2) + 2*(0.6*0.4*one*0.2*0.1)
+var2 = (0.1^2 * 0.6^2) + (0.2^2 * 0.4^2) + 2*(0.6*0.4*two*0.2*0.1)
+var3 = (0.1^2 * 0.6^2) + (0.2^2 * 0.4^2) + 2*(0.6*0.4*three*0.2*0.1)
+var4 = (0.1^2 * 0.6^2) + (0.2^2 * 0.4^2) + 2*(0.6*0.4*four*0.2*0.1)
+
+Correlation = c(one, two, three, four)
+Variance = c(var1, var2, var3, var4)
+SD = sqrt(Variance)
+
+answers = data.frame(Correlation, Variance, SD)
+
+answers
+
+
+```
+
+Variance on a **three asset portfolio**
+
+![](/Users/sengwill20/Desktop/FINC2011/threeassetformula.png)
+
+
+
+## Components of risk
+The risk of investing in a single security can be reduced by combining the security with others in a portfolio due to diversification.
+- This is because there are two components of total risk:
+1. Non-systematic (or diversifiable) risk
+2. Systematic (or non-diversifiable) risk
+
+
+**Non-systematic risk** relates to price movements that are caused by an event that influences a single company alone.
+
+- It is also known as diversifiable risk because it can be diversified away.
+
+**Systematic risk** relates to macroeconomic events that affect the prices of all securities and are reflected in broad market movements.
+
+- It is referred to as ‘non-diversifiable’ as it is common to all securities and cannot be diversified away
+
+##Measurement of market risk
+
+The beta of a security measures the responsiveness of the security’s return to the overall market return
+
+Substituting this into equation for straight line
+
+$$r_{i} = \alpha + \beta r_{m}$$
+
+where:
+
+- $r_{m}$= return on the market
+-$r_{i}$ = return on stock i
+- $\alpha$= the intercept coefficient (Y intercept)
+- $\beta$ = the slope coefficient (slope of the line)
+
+this is known as the **market model**
+
+In a statistical sense, beta (β) tells us the tendency of an individual security’s return to co-vary with the market portfolio.
+
+$$ \beta_{i,m} = \frac{\sigma_{i,m}}{\sigma_{m}^2}$$
+
+Beta measures the degree of exposure of the individual asset to market risk
+
+![](/Users/sengwill20/Desktop/FINC2011/BetaInterpretation.png)
+
+

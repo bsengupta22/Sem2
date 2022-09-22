@@ -1,0 +1,82 @@
+---
+title: "Cleaning Data Practice"
+author: "Billy"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+
+# Clean data
+```{r}
+library(tidyverse)
+view(starwars)
+
+# variable types
+
+glimpse(starwars) #shows you variables
+class(starwars$gender) #shows you the class of variable it is
+unique(starwars$gender) # shows you the unique options
+
+starwars$gender <- as.factor(starwars$gender)
+class(starwars$gender) #changes class to a factor from character
+
+levels(starwars$gender) <- factor((starwars$gender),
+                                     levels = c("masculine", "feminine"))
+
+levels(starwars$gender)
+
+
+```
+
+```{r}
+
+names(starwars)
+
+starwars %>% 
+  select(name, height, ends_with("color"))
+
+unique(starwars$hair_color)
+
+starwars %>% filter(hair_color %in% c("blond", "brown") & height < 180) 
+
+```
+
+### Missing data
+
+```{r}
+mean(starwars$height, na.rm = TRUE) #NA because missing values (na.rm removes missing data)
+
+starwars %>% 
+  select(name, gender, hair_color, height) %>% na.omit()  ## don't do this, it omits the data without knowing what NA values its missing
+
+starwars %>% select(name, gender, hair_color, height) %>% filter(!complete.cases(.)) # Shows you the datasets where we are missing data
+
+
+# there might be instances where missing data means something, it is worth replacing with something, eg no hair means they have something else
+# there might also be instances where not having data is important and you should remove it
+
+
+starwars %>%
+  select(name, gender, hair_color, height) %>% 
+  filter(!complete.cases(.)) %>% 
+  mutate(hair_color = replace_na(hair_color, "none"))
+
+#adds new column hair color 2
+starwars %>%
+  select(name, gender, hair_color, height) %>% 
+  filter(!complete.cases(.)) %>% 
+  mutate(hair_color2 = replace_na(hair_color, "none"))
+
+
+# duplicates
+
+
+
+```
+
+
+
+
+
+
+

@@ -1,0 +1,294 @@
+---
+title: "Multiple testing"
+---
+
+
+
+```{r}
+library(tidyverse)
+load("data/microRNA_full.RData")
+
+str(AD)
+head(AD)
+
+disease_status = data.frame(AD) |> 
+  tibble::rownames_to_column("subject")
+str(disease_status)
+
+microRNA_Data[1:4,1:3]
+```
+
+
+```{r}
+mirna = microRNA_Data |>
+  tibble::rownames_to_column("microRNA") |> 
+  tidyr::pivot_longer(cols = -1, names_to = "subject", values_to = "value") |> 
+  dplyr::left_join(disease_status)
+```
+
+
+```{r}
+head(mirna, n = 4)
+
+mirna |> select(subject, AD) |> 
+  distinct() |> 
+  janitor::tabyl(AD) |> 
+  janitor::adorn_pct_formatting()
+```
+
+
+```{r}
+mirna |> 
+  group_by(microRNA) |> 
+  nest() |> 
+  ungroup() |> 
+  slice(1:15) |> # extract first 15 groups
+  unnest(cols = everything()) |> 
+  ggplot() + 
+  aes(y = reorder(microRNA, value), 
+      x = value, colour = factor(AD)) + 
+  geom_boxplot(coef = 10) + 
+  scale_color_brewer(palette = "Set1") + 
+  theme(legend.position = "top") + 
+  labs(colour = "Disease status",
+       y = "MicroRNA")
+```
+
+
+
+
+```{r}
+mirna_res = mirna |> 
+  group_by(microRNA) |> 
+  summarise(pval = t.test(value ~ AD)$p.value)
+mirna_res |> ggplot() + aes(x = pval) + 
+  geom_histogram(boundary = 0, 
+                 binwidth = 0.05, 
+                 fill = "skyblue", 
+                 colour = "black")
+
+sum(mirna_res$pval < 0.05)
+```
+
+
+```{r}
+set.seed(2)
+mirna_res = mirna_res |> 
+  mutate(null_pval = runif(n = n(), 
+                           min = 0, 
+                           max = 1))
+mirna_res |> ggplot() + aes(x = null_pval) + 
+  geom_histogram(boundary = 0, 
+                 binwidth = 0.05,
+                 fill = "midnightblue", 
+                 colour = "black")
+
+sum(mirna_res$null_pval < 0.05)
+```
+
+
+
+
+
+```{r}
+alpha = 0.2
+m = 10
+M = nrow(mirna_res)
+set.seed(123, sample.kind = "Rounding")
+sample_rows = sample(1:M, size = m)
+mirna10 = mirna_res |> 
+  select(microRNA, pval) |> 
+  slice(sample_rows) |> 
+  mutate(p_bonferroni = pmin(pval*m, 1)) |> 
+  arrange(pval)
+
+mirna10 |> 
+  knitr::kable(digits = 4) |> 
+  kableExtra::kable_styling(
+    font_size = 16)
+
+alpha = 0.2
+m = 10
+p_vals = sort(mirna10$pval)
+# BH procedure
+# j=1: smallest p-value < 1*alpha/m?
+p_vals[1] < 1*alpha/m
+# j=2: 
+# second smallest p-value < 2*alpha/m?
+p_vals[2] < 2*alpha/m
+
+# j=3: 
+# third smallest p-value < 3*alpha/m?
+p_vals[3] < 3*alpha/m
+# j=4: 
+# fourth smallest p-value < 4*alpha/m?
+p_vals[4] < 4*alpha/m
+# j=5: 
+# fifth smallest p-value < 5*alpha/m?
+p_vals[5] < 5*alpha/m
+# and so on ...
+
+# in general...
+result = vector(length = length(p_vals))
+p_vals = sort(p_vals) # we already did this but just emphasising it
+for(j in seq(p_vals)) { # seq(p_vals) is the same as 1:length(pvals)
+  result[j] = p_vals[j] < j*alpha/m
+}
+result
+largest_true = max(which(result == TRUE))
+largest_true
+significant_pvals = p_vals[1:largest_true]
+significant_pvals
+```
+
+
+```{r}
+alpha = 0.2
+m = 10
+par(cex = 1.5, mar = c(4,4,1,1))
+plot(p_vals,
+     ylim = c(0,1), pch=19)
+abline(h = alpha, col = "blue", lwd = 3)
+abline(h = alpha/m, col = "red", lwd = 3)
+abline(a = 0, b=alpha*1/m, col = "orange", 
+       lwd = 3)
+legend("topleft", 
+       legend = c("No correction", 
+                  "Bonferroni (FWER)", 
+                  "Benjamini–Hochberg (FDR)"),
+       lty = 1, lwd = 3,
+       col = c("blue","red","orange"))
+```
+
+
+
+```{r}
+set.seed(1234)
+B = 5000
+p_vals = rep(NA, B)
+case1 = tibble(experiment = 1:B) |> 
+  group_by(experiment) |> 
+  summarise(x_sample = rnorm(20),
+            y_sample = rnorm(20)) |> 
+  nest() |> 
+  mutate(
+    test = map(data, 
+               ~t.test(.$x_sample, 
+                       .$y_sample,
+                       var.equal = TRUE) |> 
+                 broom::tidy())) |> 
+  unnest(test) |> 
+  ungroup()
+mean(case1$p.value < 0.05)
+
+case1 |> ggplot() + aes(x = p.value) + 
+  geom_histogram(boundary = 0, binwidth = 0.05, 
+                 fill = "midnightblue", colour = "black")
+
+
+case1 = case1 |> 
+  mutate(
+    p_bonf = p.adjust(p.value, 
+                      "bonferroni"),
+    p_bh = p.adjust(p.value, "BH")
+  )
+case1 |> select(experiment, p.value,
+                 p_bonf, p_bh) |> 
+  head()
+
+case1 |> ungroup() |> 
+  summarise(
+    original = mean(p.value < 0.05),
+    bonferroni = mean(p_bonf < 0.05),
+    bh = mean(p_bh < 0.05)
+  )
+```
+
+
+```{r}
+set.seed(1234)
+case2 = tibble(experiment = 1:B) |> 
+  group_by(experiment) |> 
+  summarise(x_sample = rnorm(20), y_sample = rnorm(20)) |> 
+  rowwise() |> 
+  mutate(truth = if_else(experiment<=B/2, "mu1 - mu2 = 0", "mu1 - mu2 = 2"),
+         y_sample = if_else(truth == "mu1 - mu2 = 2", y_sample + 2, y_sample)) |> 
+  ungroup() |> 
+  nest(data = c(x_sample, y_sample)) |> 
+  mutate(test = map(data, ~t.test(.$x_sample, .$y_sample, var.equal = TRUE) |> 
+                      broom::tidy())) |> 
+  unnest(test) |> ungroup() |> 
+  mutate(
+    prediction = if_else(p.value < 0.05, "reject H0", "don't reject H0"),
+    p_bonf = p.adjust(p.value, method = "bonferroni"),
+    p_bh = p.adjust(p.value, method = "BH"),
+    pred_bonf = if_else(p_bonf < 0.05, "reject H0", "don't reject H0"),
+    pred_bh = if_else(p_bh < 0.05, "reject H0", "don't reject H0"))
+```
+
+
+```{r}
+# no adjustment
+case2 |> janitor::tabyl(prediction, truth)
+# Bonferroni: controls FWER 
+case2 |> janitor::tabyl(pred_bonf, truth)
+# BH: controls FDR 
+case2 |> janitor::tabyl(pred_bh, truth)
+```
+
+
+```{r}
+pval2 = case2 |> select(experiment, p.value, p_bonf, p_bh) |> 
+  pivot_longer(cols = c(p.value, p_bonf, p_bh), 
+               names_to = "method", 
+               values_to = "p_value") |> 
+  mutate(method = recode(method, 
+                         "p.value" = "Original", 
+                         "p_bh" = "BH", 
+                         "p_bonf" = "Bonferroni"))
+pval2 |> ggplot() + 
+  aes(x = p_value, fill = method) + 
+  geom_histogram(boundary = 0, binwidth = 0.05, colour = "black") + 
+  facet_grid(~method) + 
+  scale_fill_brewer(palette = "Set1") +
+  scale_x_continuous(breaks = c(0,1)) + 
+  theme(legend.position = "none")
+```
+
+
+```{r}
+mirna_res = mirna_res |> 
+  mutate(
+    p_bonf = p.adjust(pval, method = "bonferroni"),
+    p_bh = p.adjust(pval, method = "BH")
+  )
+mirna_res |> 
+  summarise(original_n_sig = sum(pval < 0.05),
+            bonf_n_sig = sum(p_bonf < 0.05),
+            bh_n_sig = sum(p_bh < 0.05))
+```
+
+
+
+
+```{r}
+library(gt)
+mirna_res |> arrange(pval) |> 
+  select(-null_pval, `Original p-value` = pval, 
+         `Bonferroni p-value` = p_bonf,  `BH p-value` = p_bh) |> 
+  head(n=8) |> 
+  gt() |> fmt_scientific(columns = 2:4) |> 
+  tab_style(
+    style = list(
+      cell_fill(color = "#F9E3D6"),
+      cell_text(style = "italic")),
+    locations = list(
+      cells_body(columns = `Original p-value`, 
+                 rows = `Original p-value` < 0.05),
+      cells_body(columns = `Bonferroni p-value`, 
+                 rows = `Bonferroni p-value` < 0.05),
+      cells_body(columns = `BH p-value`, rows = `BH p-value` < 0.05)
+    ))
+```
+
+

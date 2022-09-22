@@ -1,0 +1,25 @@
+---
+title: "LO11"
+author: "Billy"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# LO11, Confidence Intervals, Rejection regions and Critical values
+
+
+
+## Random Variable Basics
+
+
+- a random variable is a mathetmatical object which takes certain values with certain probabilities
+- we have *discrete* and *continuous* random varibles although we can always approximate a continous one with a discrete one
+- A simple discrete random varibale X can be described as a *single random* draw from a "box" containing tickets, each with numbers written on them
+  + F(X) = $\mu$ (the average of numbers in the box)
+  + Var(X) = 
+
+
